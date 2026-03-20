@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Golf Shot Tracker</title>
+    <meta name="theme-color" content="#24533a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Golf Tracker" />
+    <link rel="apple-touch-icon" href="./Driver.png" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Mobile Round Log</p>
+          <h1>Track each hole in a fast, thumb-friendly flow.</h1>
+          <p class="hero-text">
+            Log the tee ball, capture the approach, and review your trends from
+            the same screen. Everything saves right on your phone.
+          </p>
+        </div>
+        <div class="hero-card hero-stats-card">
+          <p class="hero-card-label">Quick glance</p>
+          <div id="heroSummary" class="hero-summary"></div>
+        </div>
+      </section>
+
+      <nav class="mobile-nav" aria-label="Primary">
+        <button class="mobile-nav-button is-active" data-view-target="entryPanel" type="button">
+          Entry
+        </button>
+        <button class="mobile-nav-button" data-view-target="statsPanel" type="button">
+          Summary
+        </button>
+        <button class="mobile-nav-button" data-view-target="historyPanel" type="button">
+          History
+        </button>
+      </nav>
+
+      <section class="dashboard" id="entryPanel">
+        <div class="panel panel-form">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Shot Entry</p>
+              <h2>Add a hole</h2>
+            </div>
+            <button id="resetFormButton" class="ghost-button compact-button" type="button">
+              Reset form
+            </button>
+          </div>
+
+          <form id="shotForm" class="shot-form">
+            <div class="field-grid field-grid-compact">
+              <label class="field">
+                <span>Round name</span>
+                <input
+                  type="text"
+                  name="roundName"
+                  placeholder="Saturday Nassau"
+                  maxlength="40"
+                />
+              </label>
+
+              <label class="field">
+                <span>Hole</span>
+                <input type="number" name="hole" min="1" max="18" required />
+              </label>
+            </div>
+
+            <div class="entry-section">
+              <div class="entry-header">
+                <p class="section-kicker">Tee Shot</p>
+                <h3>Start of the hole</h3>
+              </div>
+              <div class="club-picker" id="teeClubPicker"></div>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Tee club</span>
+                  <select name="teeClub" id="teeClubSelect" required></select>
+                </label>
+
+                <label class="field">
+                  <span>Where it ended up</span>
+                  <select name="teeOutcome" required>
+                    <option value="">Choose outcome</option>
+                    <option>Fairway</option>
+                    <option>Left rough</option>
+                    <option>Right rough</option>
+                    <option>Fairway bunker</option>
+                    <option>Left trees</option>
+                    <option>Right trees</option>
+                    <option>Penalty area</option>
+                    <option>Out of bounds</option>
+                    <option>Green</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="entry-section">
+              <div class="entry-header">
+                <p class="section-kicker">Approach Shot</p>
+                <h3>Into the scoring zone</h3>
+              </div>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Approach distance (yards)</span>
+                  <input
+                    type="number"
+                    name="approachDistance"
+                    min="1"
+                    max="400"
+                    required
+                  />
+                </label>
+
+                <label class="field">
+                  <span>Approach club</span>
+                  <select name="approachClub" id="approachClubSelect" required></select>
+                </label>
+
+                <label class="field">
+                  <span>Approach result</span>
+                  <select name="approachOutcome" required>
+                    <option value="">Choose result</option>
+                    <option>Green in regulation</option>
+                    <option>Front fringe</option>
+                    <option>Back fringe</option>
+                    <option>Left of green</option>
+                    <option>Right of green</option>
+                    <option>Short of green</option>
+                    <option>Long of green</option>
+                    <option>Greenside bunker</option>
+                    <option>Penalty area</option>
+                  </select>
+                </label>
+              </div>
+
+              <fieldset class="rating-fieldset">
+                <legend>Strike rating</legend>
+                <div id="strikeRatingGroup" class="rating-row"></div>
+              </fieldset>
+
+              <label class="field">
+                <span>Notes</span>
+                <textarea
+                  name="notes"
+                  rows="3"
+                  maxlength="140"
+                  placeholder="Pulled it slightly, but the strike felt great."
+                ></textarea>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <div class="save-bar">
+                <div>
+                  <p class="save-bar-label">Ready to log this hole?</p>
+                  <p id="saveFeedback" class="save-feedback">Nothing saved yet.</p>
+                </div>
+                <button class="primary-button" type="submit">Save hole</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="dashboard-panel" id="statsPanel">
+        <div class="panel panel-stats">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Performance</p>
+              <h2>Round summary</h2>
+            </div>
+          </div>
+
+          <div id="statsGrid" class="stats-grid"></div>
+        </div>
+      </section>
+
+      <section class="dashboard-panel" id="historyPanel">
+        <div class="panel panel-stats">
+          <div class="history-header">
+            <div>
+              <p class="section-kicker">History</p>
+              <h3>Saved holes</h3>
+            </div>
+            <button id="clearAllButton" class="ghost-button compact-button" type="button">
+              Clear all data
+            </button>
+          </div>
+
+          <div id="emptyState" class="empty-state">
+            Add your first hole to start building a pattern.
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <template id="historyItemTemplate">
+      <article class="history-card">
+        <div class="history-topline">
+          <div>
+            <p class="history-round"></p>
+            <h4 class="history-hole"></h4>
+          </div>
+          <button class="delete-button" type="button">Delete</button>
+        </div>
+        <div class="history-details"></div>
+        <p class="history-notes"></p>
+      </article>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

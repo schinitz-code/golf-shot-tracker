@@ -389,7 +389,7 @@ function renderHistory() {
   });
 }
 
-function exportEntriesAsCsv() {
+async function exportEntriesAsCsv() {
   if (!entries.length) {
     return;
   }
@@ -426,13 +426,30 @@ function exportEntriesAsCsv() {
     .join("\n");
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
   const latestEntry = getLatestEntry();
   const baseName = latestEntry?.roundName || "golf-round";
+  const fileName = `${slugifyFileName(baseName)}-shots.csv`;
 
+  if (navigator.share && typeof File !== "undefined") {
+    const file = new File([blob], fileName, { type: "text/csv" });
+
+    try {
+      await navigator.share({
+        title: "Golf Shot Tracker Export",
+        files: [file]
+      });
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        return;
+      }
+    }
+  }
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${slugifyFileName(baseName)}-shots.csv`;
+  anchor.download = fileName;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);

@@ -83,6 +83,14 @@ body::before {
   color: #f8f4e8;
 }
 
+.hero-action-button {
+  margin-top: 16px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff8ef;
+}
+
 .eyebrow,
 .section-kicker,
 .hero-card-label {
@@ -225,6 +233,47 @@ h3 {
   width: 100%;
 }
 
+.club-report-header {
+  margin-top: 24px;
+}
+
+.club-report-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.club-report-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(50, 43, 34, 0.09);
+}
+
+.club-report-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.club-report-card h4 {
+  font-size: 1.25rem;
+}
+
+.club-report-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.club-report-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .shot-form {
   display: grid;
   gap: 18px;
@@ -362,6 +411,10 @@ textarea:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 10px;
+}
+
+.is-hidden {
+  display: none !important;
 }
 
 .rating-pill {
@@ -581,7 +634,7 @@ textarea:focus {
   }
 
   .field-grid-compact {
-    grid-template-columns: minmax(0, 2fr) minmax(120px, 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(120px, 120px) minmax(120px, 120px);
   }
 
   .club-picker {
@@ -605,6 +658,10 @@ textarea:focus {
   .history-actions {
     width: auto;
     flex-direction: row;
+  }
+
+  .club-report-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .primary-button {

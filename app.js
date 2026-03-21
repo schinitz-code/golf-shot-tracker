@@ -28,6 +28,8 @@ const strikeRatings = [
 
 const form = document.querySelector("#shotForm");
 const roundNameInput = document.querySelector('input[name="roundName"]');
+const parSelect = document.querySelector("#parSelect");
+const teeShotSection = document.querySelector("#teeShotSection");
 const teeClubPicker = document.querySelector("#teeClubPicker");
 const teeClubSelect = document.querySelector("#teeClubSelect");
 const approachClubSelect = document.querySelector("#approachClubSelect");
@@ -35,7 +37,9 @@ const strikeRatingGroup = document.querySelector("#strikeRatingGroup");
 const historyList = document.querySelector("#historyList");
 const emptyState = document.querySelector("#emptyState");
 const statsGrid = document.querySelector("#statsGrid");
+const clubReport = document.querySelector("#clubReport");
 const heroSummary = document.querySelector("#heroSummary");
+const startRoundButton = document.querySelector("#startRoundButton");
 const resetFormButton = document.querySelector("#resetFormButton");
 const clearAllButton = document.querySelector("#clearAllButton");
 const exportButton = document.querySelector("#exportButton");
@@ -56,17 +60,21 @@ function bootstrap() {
   renderStrikeOptions();
   form.addEventListener("submit", handleSubmit);
   resetFormButton.addEventListener("click", resetForm);
+  startRoundButton.addEventListener("click", startNewRound);
   clearAllButton.addEventListener("click", clearAllEntries);
   exportButton.addEventListener("click", exportEntriesAsCsv);
   historyList.addEventListener("click", handleDeleteClick);
   teeClubSelect.addEventListener("change", syncPickerToSelect);
+  parSelect.addEventListener("change", syncParView);
   navButtons.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.viewTarget));
   });
   window.addEventListener("resize", handleResize);
   roundNameInput.value = loadSavedRoundName();
   teeClubSelect.value = clubs[0].name;
+  parSelect.value = "4";
   syncPickerToSelect();
+  syncParView();
   updateSaveFeedback();
   registerServiceWorker();
   render();
@@ -152,6 +160,8 @@ function handleSubmit(event) {
   const submittedRoundName = normalizeText(data.get("roundName"));
   const rememberedRoundName = loadSavedRoundName();
   const roundName = submittedRoundName || rememberedRoundName || "Practice Round";
+  const par = Number(data.get("par"));
+  const isPar3 = par === 3;
 
   saveRoundName(roundName);
   roundNameInput.value = roundName;
@@ -161,8 +171,9 @@ function handleSubmit(event) {
     createdAt: new Date().toISOString(),
     roundName,
     hole: Number(data.get("hole")),
-    teeClub: normalizeText(data.get("teeClub")),
-    teeOutcome: normalizeText(data.get("teeOutcome")),
+    par,
+    teeClub: isPar3 ? "N/A (Par 3)" : normalizeText(data.get("teeClub")),
+    teeOutcome: isPar3 ? "Not tracked" : normalizeText(data.get("teeOutcome")),
     approachDistance: Number(data.get("approachDistance")),
     approachClub: normalizeText(data.get("approachClub")),
     approachOutcome: normalizeText(data.get("approachOutcome")),
@@ -184,9 +195,11 @@ function resetForm() {
   form.reset();
   selectedStrikeRating = 3;
   roundNameInput.value = savedRoundName;
+  parSelect.value = "4";
   teeClubSelect.value = clubs[0].name;
   renderStrikeOptions();
   syncPickerToSelect();
+  syncParView();
   updateSaveFeedback();
 }
 
@@ -202,6 +215,12 @@ function clearAllEntries() {
   updateSaveFeedback();
   render();
   switchView("entryPanel");
+}
+
+function startNewRound() {
+  localStorage.removeItem(ROUND_NAME_STORAGE_KEY);
+  resetForm();
+  roundNameInput.focus();
 }
 
 function handleDeleteClick(event) {
@@ -232,6 +251,7 @@ function render() {
   renderHeroSummary();
   renderStats();
   renderHistory();
+  renderClubReport();
   exportButton.disabled = entries.length === 0;
 }
 
@@ -240,13 +260,10 @@ function renderHeroSummary() {
   const summaryItems = [
     { value: String(entries.length), label: "Holes" },
     { value: latestEntry ? `#${latestEntry.hole}` : "-", label: "Last hole" },
+    { value: latestEntry ? `Par ${latestEntry.par}` : "-", label: "Last par" },
     {
       value: latestEntry ? `${latestEntry.approachDistance} yds` : "-",
       label: "Last approach"
-    },
-    {
-      value: latestEntry ? `${latestEntry.strikeRating}/5` : "-",
-      label: "Last strike"
     }
   ];
 
@@ -264,7 +281,8 @@ function renderHeroSummary() {
 
 function renderStats() {
   const latestEntry = getLatestEntry();
-  const teeFairways = entries.filter((entry) => entry.teeOutcome === "Fairway").length;
+  const teeOpportunities = entries.filter((entry) => entry.par !== 3);
+  const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
   const greensHit = entries.filter(
     (entry) => entry.approachOutcome === "Green in regulation"
   ).length;
@@ -283,7 +301,9 @@ function renderStats() {
     { label: "Holes tracked", value: String(entries.length) },
     {
       label: "Fairways found",
-      value: entries.length ? `${Math.round((teeFairways / entries.length) * 100)}%` : "0%"
+      value: teeOpportunities.length
+        ? `${Math.round((teeFairways / teeOpportunities.length) * 100)}%`
+        : "N/A"
     },
     {
       label: "GIR approaches",
@@ -304,6 +324,61 @@ function renderStats() {
       `
     )
     .join("");
+}
+
+function renderClubReport() {
+  if (!entries.length) {
+    clubReport.innerHTML = `
+      <div class="empty-state">Save a few holes to build per-club trends.</div>
+    `;
+    return;
+  }
+
+  const clubTotals = new Map();
+
+  entries.forEach((entry) => {
+    const clubName = entry.approachClub;
+    const current = clubTotals.get(clubName) || {
+      clubName,
+      shots: 0,
+      totalDistance: 0,
+      totalStrike: 0,
+      greensHit: 0
+    };
+
+    current.shots += 1;
+    current.totalDistance += entry.approachDistance;
+    current.totalStrike += entry.strikeRating;
+    if (entry.approachOutcome === "Green in regulation") {
+      current.greensHit += 1;
+    }
+
+    clubTotals.set(clubName, current);
+  });
+
+  const cards = [...clubTotals.values()]
+    .sort((a, b) => b.shots - a.shots || a.clubName.localeCompare(b.clubName))
+    .map((club) => {
+      const avgDistance = Math.round(club.totalDistance / club.shots);
+      const avgStrike = club.totalStrike / club.shots;
+      const girRate = Math.round((club.greensHit / club.shots) * 100);
+
+      return `
+        <article class="club-report-card">
+          <div class="club-report-card-top">
+            <h4>${club.clubName}</h4>
+            <span class="club-report-meta">${club.shots} shot${club.shots === 1 ? "" : "s"}</span>
+          </div>
+          <div class="club-report-stats">
+            <div class="detail-chip"><strong>Avg Distance</strong>${avgDistance} yds</div>
+            <div class="detail-chip"><strong>Avg Strike</strong>${avgStrike.toFixed(1)} / 5</div>
+            <div class="detail-chip"><strong>GIR Rate</strong>${girRate}%</div>
+          </div>
+        </article>
+      `;
+    });
+
+  clubReport.innerHTML = cards.join("");
 }
 
 function switchView(targetId) {
@@ -365,6 +440,7 @@ function renderHistory() {
     hole.textContent = `Hole ${entry.hole}`;
 
     const detailItems = [
+      { label: "Par", value: String(entry.par) },
       { label: "Tee club", value: entry.teeClub },
       { label: "Tee result", value: entry.teeOutcome },
       { label: "Approach", value: `${entry.approachDistance} yds` },
@@ -399,6 +475,7 @@ async function exportEntriesAsCsv() {
   const headers = [
     "Course/Round",
     "Hole",
+    "Par",
     "Date",
     "Tee Club",
     "Tee Outcome",
@@ -412,6 +489,7 @@ async function exportEntriesAsCsv() {
   const rows = sortedEntries.map((entry) => [
     entry.roundName,
     entry.hole,
+    entry.par,
     formatExportDate(entry.createdAt),
     entry.teeClub,
     entry.teeOutcome,
@@ -464,7 +542,12 @@ function persistEntries() {
 function loadEntries() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return raw
+      ? JSON.parse(raw).map((entry) => ({
+          ...entry,
+          par: entry.par ? Number(entry.par) : 4
+        }))
+      : [];
   } catch (error) {
     console.error("Unable to load saved entries", error);
     return [];
@@ -486,6 +569,14 @@ function saveRoundName(value) {
   } catch (error) {
     console.error("Unable to save round name", error);
   }
+}
+
+function syncParView() {
+  const isPar3 = Number(parSelect.value) === 3;
+
+  teeShotSection.classList.toggle("is-hidden", isPar3);
+  teeClubSelect.required = !isPar3;
+  form.elements.teeOutcome.required = !isPar3;
 }
 
 function normalizeText(value) {

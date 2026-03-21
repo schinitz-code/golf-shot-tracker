@@ -5,13 +5,16 @@ const clubs = [
   { name: "3 Wood", image: "3 wood.png" },
   { name: "4 Wood", image: "4 wood.png" },
   { name: "7 Wood", image: "7 wood.png" },
+  { name: "5 Iron" },
+  { name: "6 Iron" },
   { name: "7 Iron", image: "7 iron.png" },
   { name: "8 Iron", image: "8 iron.png" },
   { name: "9 Iron", image: "9 iron.png" },
   { name: "Pitching Wedge", image: "PW.png" },
-  { name: "Gap Wedge", image: "Gap wedge.png" },
-  { name: "48 Degree Wedge", image: "Gap wedge 48 degrees.png" },
-  { name: "Sand Wedge", image: "SW.png" }
+  { name: "48 Degrees", image: "Gap wedge 48 degrees.png" },
+  { name: "52 Degree Wedge" },
+  { name: "56 Degree Wedge" },
+  { name: "60 Degree Wedge" }
 ];
 
 const strikeRatings = [
@@ -78,15 +81,10 @@ function populateClubSelects() {
 function renderClubPicker() {
   teeClubPicker.innerHTML = "";
 
-  clubs.forEach((club) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "club-tile";
-    button.dataset.club = club.name;
-    button.innerHTML = `
-      <img src="${club.image}" alt="${club.name}" />
-      <span>${club.name}</span>
-    `;
+  button.innerHTML = `
+  ${club.image ? `<img src="${club.image}" alt="${club.name}" />` : ""}
+  <span>${club.name}</span>
+`;
 
     button.addEventListener("click", () => {
       teeClubSelect.value = club.name;

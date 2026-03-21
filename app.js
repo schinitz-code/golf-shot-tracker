@@ -302,9 +302,7 @@ function renderStats() {
   const latestEntry = getLatestEntry();
   const teeOpportunities = entries.filter((entry) => entry.par !== 3);
   const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
-  const greensHit = entries.filter(
-    (entry) => entry.approachOutcome === "Green in regulation"
-  ).length;
+  const greensHit = entries.filter((entry) => entry.approachOutcome === "GIR").length;
   const averageApproachDistance = entries.length
     ? Math.round(
         entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length
@@ -368,7 +366,7 @@ function renderClubReport() {
     current.shots += 1;
     current.totalDistance += entry.approachDistance;
     current.totalStrike += entry.strikeRating;
-    if (entry.approachOutcome === "Green in regulation") {
+    if (entry.approachOutcome === "GIR") {
       current.greensHit += 1;
     }
 

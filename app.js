@@ -1,17 +1,16 @@
 const STORAGE_KEY = "golf-shot-tracker-entries";
 
 const clubs = [
-  { name: "Driver", image: "Driver.png" },
-  { name: "3 Wood", image: "3 wood.png" },
-  { name: "4 Wood", image: "4 wood.png" },
-  { name: "7 Wood", image: "7 wood.png" },
+  { name: "Driver" },
+  { name: "Mini Driver" },
+  { name: "3 Wood" },
   { name: "5 Iron" },
   { name: "6 Iron" },
-  { name: "7 Iron", image: "7 iron.png" },
-  { name: "8 Iron", image: "8 iron.png" },
-  { name: "9 Iron", image: "9 iron.png" },
-  { name: "Pitching Wedge", image: "PW.png" },
-  { name: "48 Degrees", image: "Gap wedge 48 degrees.png" },
+  { name: "7 Iron" },
+  { name: "8 Iron" },
+  { name: "9 Iron" },
+  { name: "Pitching Wedge" },
+  { name: "48 Degree Wedge" },
   { name: "52 Degree Wedge" },
   { name: "56 Degree Wedge" },
   { name: "60 Degree Wedge" }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "golf-shot-tracker-v2";
+const CACHE_NAME = "golf-shot-tracker-v3";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -38,6 +38,12 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => cachedResponse || fetch(event.request))
+    fetch(event.request)
+      .then((networkResponse) => {
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

@@ -93,6 +93,7 @@ function renderClubPicker() {
         <span>${club.name}</span>
       `;
     } else {
+      button.classList.add("club-tile-text");
       button.innerHTML = `
         <span>${club.name}</span>
       `;
@@ -106,7 +107,6 @@ function renderClubPicker() {
     teeClubPicker.appendChild(button);
   });
 }
-
 
 function renderStrikeOptions() {
   strikeRatingGroup.innerHTML = "";

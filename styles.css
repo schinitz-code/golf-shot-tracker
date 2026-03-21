@@ -277,17 +277,13 @@ h3 {
   font-weight: 700;
 }
 
-.club-tile img + span {
-  margin-top: 8px;
-}
-
-.club-tile:not(:has(img)) {
+.club-tile-text {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.club-tile:not(:has(img)) span {
+.club-tile-text span {
   margin-top: 0;
   font-size: 0.95rem;
 }

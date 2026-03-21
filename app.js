@@ -4,6 +4,7 @@ const clubs = [
   { name: "Driver" },
   { name: "Mini Driver" },
   { name: "3 Wood" },
+  { name: "7 Wood" },
   { name: "5 Iron" },
   { name: "6 Iron" },
   { name: "7 Iron" },
@@ -19,9 +20,9 @@ const clubs = [
 const strikeRatings = [
   { value: 1, label: "1 Poor" },
   { value: 2, label: "2 Thin" },
-  { value: 3, label: "3 Solid" },
-  { value: 4, label: "4 Flush" },
-  { value: 5, label: "5 Pure" }
+  { value: 3, label: "3 Fat" },
+  { value: 4, label: "4 Solid" },
+  { value: 5, label: "5 Flush" }
 ];
 
 const form = document.querySelector("#shotForm");

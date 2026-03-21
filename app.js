@@ -1,17 +1,18 @@
 const STORAGE_KEY = "golf-shot-tracker-entries";
+const ROUND_NAME_STORAGE_KEY = "golf-shot-tracker-round-name";
 
 const clubs = [
-  { name: "Driver" },
-  { name: "Mini Driver" },
-  { name: "3 Wood" },
-  { name: "7 Wood" },
+  { name: "Driver", image: "Driver.png" },
+  { name: "3 Wood", image: "3 wood.png" },
+  { name: "4 Wood", image: "4 wood.png" },
+  { name: "7 Wood", image: "7 wood.png" },
   { name: "5 Iron" },
   { name: "6 Iron" },
-  { name: "7 Iron" },
-  { name: "8 Iron" },
-  { name: "9 Iron" },
-  { name: "Pitching Wedge" },
-  { name: "48 Degree Wedge" },
+  { name: "7 Iron", image: "7 iron.png" },
+  { name: "8 Iron", image: "8 iron.png" },
+  { name: "9 Iron", image: "9 iron.png" },
+  { name: "Pitching Wedge", image: "PW.png" },
+  { name: "48 Degrees", image: "Gap wedge 48 degrees.png" },
   { name: "52 Degree Wedge" },
   { name: "56 Degree Wedge" },
   { name: "60 Degree Wedge" }
@@ -20,12 +21,13 @@ const clubs = [
 const strikeRatings = [
   { value: 1, label: "1 Poor" },
   { value: 2, label: "2 Thin" },
-  { value: 3, label: "3 Fat" },
-  { value: 4, label: "4 Solid" },
-  { value: 5, label: "5 Flush" }
+  { value: 3, label: "3 Solid" },
+  { value: 4, label: "4 Flush" },
+  { value: 5, label: "5 Pure" }
 ];
 
 const form = document.querySelector("#shotForm");
+const roundNameInput = document.querySelector('input[name="roundName"]');
 const teeClubPicker = document.querySelector("#teeClubPicker");
 const teeClubSelect = document.querySelector("#teeClubSelect");
 const approachClubSelect = document.querySelector("#approachClubSelect");
@@ -60,6 +62,7 @@ function bootstrap() {
     button.addEventListener("click", () => switchView(button.dataset.viewTarget));
   });
   window.addEventListener("resize", handleResize);
+  roundNameInput.value = loadSavedRoundName();
   teeClubSelect.value = clubs[0].name;
   syncPickerToSelect();
   updateSaveFeedback();
@@ -144,10 +147,17 @@ function handleSubmit(event) {
   event.preventDefault();
 
   const data = new FormData(form);
+  const submittedRoundName = normalizeText(data.get("roundName"));
+  const rememberedRoundName = loadSavedRoundName();
+  const roundName = submittedRoundName || rememberedRoundName || "Practice Round";
+
+  saveRoundName(roundName);
+  roundNameInput.value = roundName;
+
   const entry = {
     id: createEntryId(),
     createdAt: new Date().toISOString(),
-    roundName: normalizeText(data.get("roundName")) || "Practice Round",
+    roundName,
     hole: Number(data.get("hole")),
     teeClub: normalizeText(data.get("teeClub")),
     teeOutcome: normalizeText(data.get("teeOutcome")),
@@ -168,8 +178,10 @@ function handleSubmit(event) {
 }
 
 function resetForm() {
+  const savedRoundName = loadSavedRoundName();
   form.reset();
   selectedStrikeRating = 3;
+  roundNameInput.value = savedRoundName;
   teeClubSelect.value = clubs[0].name;
   renderStrikeOptions();
   syncPickerToSelect();
@@ -386,6 +398,23 @@ function loadEntries() {
   } catch (error) {
     console.error("Unable to load saved entries", error);
     return [];
+  }
+}
+
+function loadSavedRoundName() {
+  try {
+    return localStorage.getItem(ROUND_NAME_STORAGE_KEY) || "";
+  } catch (error) {
+    console.error("Unable to load saved round name", error);
+    return "";
+  }
+}
+
+function saveRoundName(value) {
+  try {
+    localStorage.setItem(ROUND_NAME_STORAGE_KEY, value);
+  } catch (error) {
+    console.error("Unable to save round name", error);
   }
 }
 

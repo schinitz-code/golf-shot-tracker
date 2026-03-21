@@ -218,6 +218,13 @@ h3 {
   flex-direction: column;
 }
 
+.history-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
 .shot-form {
   display: grid;
   gap: 18px;
@@ -593,6 +600,11 @@ textarea:focus {
   .save-bar {
     grid-template-columns: 1fr auto;
     align-items: center;
+  }
+
+  .history-actions {
+    width: auto;
+    flex-direction: row;
   }
 
   .primary-button {

@@ -5,7 +5,6 @@ const clubs = [
   { name: "Driver" },
   { name: "Mini Driver" },
   { name: "3 Wood" },
-  { name: "7 Wood" },
   { name: "5 Iron" },
   { name: "6 Iron" },
   { name: "7 Iron" },
@@ -21,9 +20,9 @@ const clubs = [
 const strikeRatings = [
   { value: 1, label: "1 Poor" },
   { value: 2, label: "2 Thin" },
-  { value: 3, label: "3 Fat" },
-  { value: 4, label: "4 Solid" },
-  { value: 5, label: "5 Flush" }
+  { value: 3, label: "3 Solid" },
+  { value: 4, label: "4 Flush" },
+  { value: 5, label: "5 Pure" }
 ];
 
 const form = document.querySelector("#shotForm");
@@ -38,6 +37,7 @@ const statsGrid = document.querySelector("#statsGrid");
 const heroSummary = document.querySelector("#heroSummary");
 const resetFormButton = document.querySelector("#resetFormButton");
 const clearAllButton = document.querySelector("#clearAllButton");
+const exportButton = document.querySelector("#exportButton");
 const historyTemplate = document.querySelector("#historyItemTemplate");
 const saveFeedback = document.querySelector("#saveFeedback");
 const navButtons = document.querySelectorAll(".mobile-nav-button");
@@ -56,6 +56,7 @@ function bootstrap() {
   form.addEventListener("submit", handleSubmit);
   resetFormButton.addEventListener("click", resetForm);
   clearAllButton.addEventListener("click", clearAllEntries);
+  exportButton.addEventListener("click", exportEntriesAsCsv);
   historyList.addEventListener("click", handleDeleteClick);
   teeClubSelect.addEventListener("change", syncPickerToSelect);
   navButtons.forEach((button) => {
@@ -230,6 +231,7 @@ function render() {
   renderHeroSummary();
   renderStats();
   renderHistory();
+  exportButton.disabled = entries.length === 0;
 }
 
 function renderHeroSummary() {
@@ -387,6 +389,56 @@ function renderHistory() {
   });
 }
 
+function exportEntriesAsCsv() {
+  if (!entries.length) {
+    return;
+  }
+
+  const sortedEntries = [...entries].sort((a, b) => a.hole - b.hole);
+  const headers = [
+    "Course/Round",
+    "Hole",
+    "Date",
+    "Tee Club",
+    "Tee Outcome",
+    "Approach Distance",
+    "Approach Club",
+    "Approach Outcome",
+    "Strike Rating",
+    "Notes"
+  ];
+
+  const rows = sortedEntries.map((entry) => [
+    entry.roundName,
+    entry.hole,
+    formatExportDate(entry.createdAt),
+    entry.teeClub,
+    entry.teeOutcome,
+    entry.approachDistance,
+    entry.approachClub,
+    entry.approachOutcome,
+    entry.strikeRating,
+    entry.notes
+  ]);
+
+  const csv = [headers, ...rows]
+    .map((row) => row.map((value) => escapeCsvValue(value)).join(","))
+    .join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  const latestEntry = getLatestEntry();
+  const baseName = latestEntry?.roundName || "golf-round";
+
+  anchor.href = url;
+  anchor.download = `${slugifyFileName(baseName)}-shots.csv`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
 function persistEntries() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
@@ -443,6 +495,26 @@ function formatDate(value) {
     month: "short",
     day: "numeric"
   }).format(new Date(value));
+}
+
+function formatExportDate(value) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(value));
+}
+
+function escapeCsvValue(value) {
+  const stringValue = String(value ?? "");
+  return `"${stringValue.replaceAll('"', '""')}"`;
+}
+
+function slugifyFileName(value) {
+  return String(value || "golf-round")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function registerServiceWorker() {

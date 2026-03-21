@@ -18,6 +18,10 @@ const clubs = [
   { name: "60 Degree Wedge" }
 ];
 
+const approachClubs = clubs.filter(
+  (club) => club.name !== "Driver" && club.name !== "Mini Driver"
+);
+
 const strikeRatings = [
   { value: 1, label: "1 Poor" },
   { value: 2, label: "2 Thin" },
@@ -82,13 +86,17 @@ function bootstrap() {
 }
 
 function populateClubSelects() {
-  const optionsMarkup = [
+  const teeOptionsMarkup = [
     '<option value="">Choose club</option>',
     ...clubs.map((club) => `<option value="${club.name}">${club.name}</option>`)
   ].join("");
+  const approachOptionsMarkup = [
+    '<option value="">Choose club</option>',
+    ...approachClubs.map((club) => `<option value="${club.name}">${club.name}</option>`)
+  ].join("");
 
-  teeClubSelect.innerHTML = optionsMarkup;
-  approachClubSelect.innerHTML = optionsMarkup;
+  teeClubSelect.innerHTML = teeOptionsMarkup;
+  approachClubSelect.innerHTML = approachOptionsMarkup;
 }
 
 function renderClubPicker() {

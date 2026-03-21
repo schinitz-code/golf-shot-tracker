@@ -81,10 +81,22 @@ function populateClubSelects() {
 function renderClubPicker() {
   teeClubPicker.innerHTML = "";
 
-  button.innerHTML = `
-  ${club.image ? `<img src="${club.image}" alt="${club.name}" />` : ""}
-  <span>${club.name}</span>
-`;
+  clubs.forEach((club) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "club-tile";
+    button.dataset.club = club.name;
+
+    if (club.image) {
+      button.innerHTML = `
+        <img src="${club.image}" alt="${club.name}" />
+        <span>${club.name}</span>
+      `;
+    } else {
+      button.innerHTML = `
+        <span>${club.name}</span>
+      `;
+    }
 
     button.addEventListener("click", () => {
       teeClubSelect.value = club.name;
@@ -94,6 +106,7 @@ function renderClubPicker() {
     teeClubPicker.appendChild(button);
   });
 }
+
 
 function renderStrikeOptions() {
   strikeRatingGroup.innerHTML = "";

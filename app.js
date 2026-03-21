@@ -418,7 +418,7 @@ async function exportEntriesAsCsv() {
     entry.approachDistance,
     entry.approachClub,
     entry.approachOutcome,
-    entry.strikeRating,
+    getStrikeRatingLabel(entry.strikeRating),
     entry.notes
   ]);
 
@@ -533,6 +533,11 @@ function slugifyFileName(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function getStrikeRatingLabel(value) {
+  const match = strikeRatings.find((rating) => rating.value === Number(value));
+  return match ? match.label : String(value ?? "");
 }
 
 function registerServiceWorker() {

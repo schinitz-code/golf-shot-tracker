@@ -1,7 +1,7 @@
 const STORAGE_KEY = "golf-shot-tracker-entries";
 const ROUND_NAME_STORAGE_KEY = "golf-shot-tracker-round-name";
 
-const clubs = [
+const teeClubs = [
   { name: "Driver" },
   { name: "Mini Driver" },
   { name: "3 Wood" },
@@ -33,6 +33,29 @@ const approachClubs = [
   { name: "3 Wood" }
 ];
 
+const parOptions = ["3", "4", "5"];
+const teeOutcomes = [
+  "Fairway",
+  "Left rough",
+  "Right rough",
+  "Fairway bunker",
+  "Left trees",
+  "Right trees",
+  "Penalty area",
+  "Out of bounds",
+  "Green"
+];
+const approachOutcomes = [
+  "GIR",
+  "Front fringe",
+  "Back fringe",
+  "Left of green",
+  "Right of green",
+  "Short of green",
+  "Long of green",
+  "Greenside bunker",
+  "Penalty area"
+];
 const strikeRatings = [
   { value: 1, label: "1 Poor" },
   { value: 2, label: "2 Thin" },
@@ -40,15 +63,27 @@ const strikeRatings = [
   { value: 4, label: "4 Solid" },
   { value: 5, label: "5 Flush" }
 ];
+const puttOptions = ["1", "2", "3"];
+const makeUnderSixOptions = ["Yes", "No"];
 
 const form = document.querySelector("#shotForm");
 const roundNameInput = document.querySelector('input[name="roundName"]');
-const parSelect = document.querySelector("#parSelect");
+const parInput = document.querySelector("#parInput");
+const parGroup = document.querySelector("#parGroup");
 const teeShotSection = document.querySelector("#teeShotSection");
 const teeClubPicker = document.querySelector("#teeClubPicker");
-const teeClubSelect = document.querySelector("#teeClubSelect");
-const approachClubSelect = document.querySelector("#approachClubSelect");
+const teeClubInput = document.querySelector("#teeClubInput");
+const teeOutcomeInput = document.querySelector("#teeOutcomeInput");
+const teeOutcomeGroup = document.querySelector("#teeOutcomeGroup");
+const approachClubInput = document.querySelector("#approachClubInput");
+const approachClubGroup = document.querySelector("#approachClubGroup");
+const approachOutcomeInput = document.querySelector("#approachOutcomeInput");
+const approachOutcomeGroup = document.querySelector("#approachOutcomeGroup");
 const strikeRatingGroup = document.querySelector("#strikeRatingGroup");
+const puttsInput = document.querySelector("#puttsInput");
+const puttsGroup = document.querySelector("#puttsGroup");
+const makeUnderSixInput = document.querySelector("#makeUnderSixInput");
+const makeUnderSixGroup = document.querySelector("#makeUnderSixGroup");
 const historyList = document.querySelector("#historyList");
 const emptyState = document.querySelector("#emptyState");
 const statsGrid = document.querySelector("#statsGrid");
@@ -70,73 +105,70 @@ let currentView = "entryPanel";
 bootstrap();
 
 function bootstrap() {
-  populateClubSelects();
-  renderClubPicker();
+  renderTeeClubPicker();
+  renderOptionGroup(parGroup, parInput, parOptions, "option-button", syncParView);
+  renderOptionGroup(teeOutcomeGroup, teeOutcomeInput, teeOutcomes);
+  renderOptionGroup(approachClubGroup, approachClubInput, approachClubs.map((club) => club.name));
+  renderOptionGroup(approachOutcomeGroup, approachOutcomeInput, approachOutcomes);
+  renderOptionGroup(puttsGroup, puttsInput, puttOptions, "option-button");
+  renderOptionGroup(makeUnderSixGroup, makeUnderSixInput, makeUnderSixOptions, "option-button");
   renderStrikeOptions();
+
   form.addEventListener("submit", handleSubmit);
   resetFormButton.addEventListener("click", resetForm);
   startRoundButton.addEventListener("click", startNewRound);
   clearAllButton.addEventListener("click", clearAllEntries);
   exportButton.addEventListener("click", exportEntriesAsCsv);
   historyList.addEventListener("click", handleDeleteClick);
-  teeClubSelect.addEventListener("change", syncPickerToSelect);
-  parSelect.addEventListener("change", syncParView);
   navButtons.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.viewTarget));
   });
   window.addEventListener("resize", handleResize);
+
   roundNameInput.value = loadSavedRoundName();
-  teeClubSelect.value = clubs[0].name;
-  parSelect.value = "4";
-  syncPickerToSelect();
-  syncParView();
+  resetForm();
   updateSaveFeedback();
   registerServiceWorker();
   render();
   switchView("entryPanel");
 }
 
-function populateClubSelects() {
-  const teeOptionsMarkup = [
-    '<option value="">Choose club</option>',
-    ...clubs.map((club) => `<option value="${club.name}">${club.name}</option>`)
-  ].join("");
-  const approachOptionsMarkup = [
-    '<option value="">Choose club</option>',
-    ...approachClubs.map((club) => `<option value="${club.name}">${club.name}</option>`)
-  ].join("");
-
-  teeClubSelect.innerHTML = teeOptionsMarkup;
-  approachClubSelect.innerHTML = approachOptionsMarkup;
-}
-
-function renderClubPicker() {
+function renderTeeClubPicker() {
   teeClubPicker.innerHTML = "";
 
-  clubs.forEach((club) => {
+  teeClubs.forEach((club) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "club-tile";
-    button.dataset.club = club.name;
-
-    if (club.image) {
-      button.innerHTML = `
-        <img src="${club.image}" alt="${club.name}" />
-        <span>${club.name}</span>
-      `;
-    } else {
-      button.classList.add("club-tile-text");
-      button.innerHTML = `
-        <span>${club.name}</span>
-      `;
-    }
-
+    button.className = "club-tile club-tile-text";
+    button.dataset.value = club.name;
+    button.innerHTML = `<span>${club.name}</span>`;
     button.addEventListener("click", () => {
-      teeClubSelect.value = club.name;
-      syncPickerToSelect();
+      teeClubInput.value = club.name;
+      syncClubPicker();
     });
-
     teeClubPicker.appendChild(button);
+  });
+}
+
+function renderOptionGroup(container, input, options, buttonClass = "option-button", onChange) {
+  container.innerHTML = "";
+
+  options.forEach((option) => {
+    const value = typeof option === "string" ? option : option.value;
+    const label = typeof option === "string" ? option : option.label;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = buttonClass;
+    button.dataset.value = value;
+    button.textContent = label;
+    button.addEventListener("click", () => {
+      input.value = value;
+      syncOptionButtons(container, input.value);
+      if (onChange) {
+        onChange();
+      }
+    });
+    container.appendChild(button);
   });
 }
 
@@ -149,38 +181,73 @@ function renderStrikeOptions() {
     button.className = "rating-pill";
     button.textContent = rating.label;
     button.dataset.value = String(rating.value);
-
     button.addEventListener("click", () => {
       selectedStrikeRating = rating.value;
-      renderStrikeOptions();
+      syncStrikeButtons();
     });
-
-    if (rating.value === selectedStrikeRating) {
-      button.classList.add("is-active");
-    }
-
     strikeRatingGroup.appendChild(button);
+  });
+
+  syncStrikeButtons();
+}
+
+function syncOptionButtons(container, selectedValue) {
+  container.querySelectorAll("button").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.value === selectedValue);
   });
 }
 
-function syncPickerToSelect() {
-  const selectedClub = teeClubSelect.value;
-  const clubTiles = teeClubPicker.querySelectorAll(".club-tile");
+function syncClubPicker() {
+  teeClubPicker.querySelectorAll(".club-tile").forEach((button) => {
+    button.classList.toggle("is-selected", button.dataset.value === teeClubInput.value);
+  });
+}
 
-  clubTiles.forEach((tile) => {
-    tile.classList.toggle("is-selected", tile.dataset.club === selectedClub);
+function syncStrikeButtons() {
+  strikeRatingGroup.querySelectorAll(".rating-pill").forEach((button) => {
+    button.classList.toggle("is-active", Number(button.dataset.value) === selectedStrikeRating);
   });
 }
 
 function handleSubmit(event) {
   event.preventDefault();
 
+  if (!form.reportValidity()) {
+    return;
+  }
+
+  const par = Number(parInput.value || "4");
+  const isPar3 = par === 3;
+  const missingSelections = [];
+
+  if (!approachClubInput.value) {
+    missingSelections.push("approach club");
+  }
+  if (!approachOutcomeInput.value) {
+    missingSelections.push("approach result");
+  }
+  if (!puttsInput.value) {
+    missingSelections.push("number of putts");
+  }
+  if (!makeUnderSixInput.value) {
+    missingSelections.push("make under 6 feet");
+  }
+  if (!isPar3 && !teeClubInput.value) {
+    missingSelections.push("tee club");
+  }
+  if (!isPar3 && !teeOutcomeInput.value) {
+    missingSelections.push("tee result");
+  }
+
+  if (missingSelections.length) {
+    window.alert(`Please select: ${missingSelections.join(", ")}.`);
+    return;
+  }
+
   const data = new FormData(form);
   const submittedRoundName = normalizeText(data.get("roundName"));
   const rememberedRoundName = loadSavedRoundName();
   const roundName = submittedRoundName || rememberedRoundName || "Practice Round";
-  const par = Number(data.get("par"));
-  const isPar3 = par === 3;
 
   saveRoundName(roundName);
   roundNameInput.value = roundName;
@@ -191,12 +258,15 @@ function handleSubmit(event) {
     roundName,
     hole: Number(data.get("hole")),
     par,
-    teeClub: isPar3 ? "N/A (Par 3)" : normalizeText(data.get("teeClub")),
-    teeOutcome: isPar3 ? "Not tracked" : normalizeText(data.get("teeOutcome")),
+    teeClub: isPar3 ? "N/A (Par 3)" : teeClubInput.value,
+    teeOutcome: isPar3 ? "Not tracked" : teeOutcomeInput.value,
     approachDistance: Number(data.get("approachDistance")),
-    approachClub: normalizeText(data.get("approachClub")),
-    approachOutcome: normalizeText(data.get("approachOutcome")),
+    approachClub: approachClubInput.value,
+    approachOutcome: approachOutcomeInput.value,
     strikeRating: selectedStrikeRating,
+    firstPuttDistance: Number(data.get("firstPuttDistance")),
+    putts: Number(puttsInput.value),
+    makeUnderSix: makeUnderSixInput.value,
     notes: normalizeText(data.get("notes"))
   };
 
@@ -211,13 +281,26 @@ function handleSubmit(event) {
 
 function resetForm() {
   const savedRoundName = loadSavedRoundName();
+
   form.reset();
-  selectedStrikeRating = 3;
   roundNameInput.value = savedRoundName;
-  parSelect.value = "4";
-  teeClubSelect.value = clubs[0].name;
-  renderStrikeOptions();
-  syncPickerToSelect();
+  parInput.value = "4";
+  teeClubInput.value = "";
+  teeOutcomeInput.value = "";
+  approachClubInput.value = "";
+  approachOutcomeInput.value = "";
+  puttsInput.value = "";
+  makeUnderSixInput.value = "";
+  selectedStrikeRating = 3;
+
+  syncOptionButtons(parGroup, parInput.value);
+  syncOptionButtons(teeOutcomeGroup, teeOutcomeInput.value);
+  syncOptionButtons(approachClubGroup, approachClubInput.value);
+  syncOptionButtons(approachOutcomeGroup, approachOutcomeInput.value);
+  syncOptionButtons(puttsGroup, puttsInput.value);
+  syncOptionButtons(makeUnderSixGroup, makeUnderSixInput.value);
+  syncClubPicker();
+  syncStrikeButtons();
   syncParView();
   updateSaveFeedback();
 }
@@ -245,11 +328,7 @@ function startNewRound() {
 function handleDeleteClick(event) {
   const target = event.target;
 
-  if (!(target instanceof HTMLButtonElement)) {
-    return;
-  }
-
-  if (!target.classList.contains("delete-button")) {
+  if (!(target instanceof HTMLButtonElement) || !target.classList.contains("delete-button")) {
     return;
   }
 
@@ -280,10 +359,7 @@ function renderHeroSummary() {
     { value: String(entries.length), label: "Holes" },
     { value: latestEntry ? `#${latestEntry.hole}` : "-", label: "Last hole" },
     { value: latestEntry ? `Par ${latestEntry.par}` : "-", label: "Last par" },
-    {
-      value: latestEntry ? `${latestEntry.approachDistance} yds` : "-",
-      label: "Last approach"
-    }
+    { value: latestEntry ? `${latestEntry.putts} putts` : "-", label: "Last putting" }
   ];
 
   heroSummary.innerHTML = summaryItems
@@ -302,17 +378,18 @@ function renderStats() {
   const latestEntry = getLatestEntry();
   const teeOpportunities = entries.filter((entry) => entry.par !== 3);
   const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
-  const greensHit = entries.filter((entry) => entry.approachOutcome === "GIR").length;
+  const girs = entries.filter((entry) => entry.approachOutcome === "GIR").length;
   const averageApproachDistance = entries.length
+    ? Math.round(entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length)
+    : 0;
+  const averagePutts = entries.length
+    ? (entries.reduce((sum, entry) => sum + entry.putts, 0) / entries.length).toFixed(1)
+    : "0.0";
+  const makeUnderSixRate = entries.length
     ? Math.round(
-        entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length
+        (entries.filter((entry) => entry.makeUnderSix === "Yes").length / entries.length) * 100
       )
     : 0;
-  const averageStrike = entries.length
-    ? (
-        entries.reduce((sum, entry) => sum + entry.strikeRating, 0) / entries.length
-      ).toFixed(1)
-    : "0.0";
 
   const stats = [
     { label: "Holes tracked", value: String(entries.length) },
@@ -322,12 +399,10 @@ function renderStats() {
         ? `${Math.round((teeFairways / teeOpportunities.length) * 100)}%`
         : "N/A"
     },
-    {
-      label: "GIR approaches",
-      value: entries.length ? `${Math.round((greensHit / entries.length) * 100)}%` : "0%"
-    },
+    { label: "GIR approaches", value: entries.length ? `${Math.round((girs / entries.length) * 100)}%` : "0%" },
     { label: "Avg approach", value: `${averageApproachDistance} yds` },
-    { label: "Avg strike", value: `${averageStrike} / 5` },
+    { label: "Avg putts", value: `${averagePutts}` },
+    { label: "Make <6'", value: `${makeUnderSixRate}%` },
     { label: "Last saved", value: latestEntry ? formatDate(latestEntry.createdAt) : "None" }
   ];
 
@@ -354,31 +429,30 @@ function renderClubReport() {
   const clubTotals = new Map();
 
   entries.forEach((entry) => {
-    const clubName = entry.approachClub;
-    const current = clubTotals.get(clubName) || {
-      clubName,
+    const current = clubTotals.get(entry.approachClub) || {
+      clubName: entry.approachClub,
       shots: 0,
       totalDistance: 0,
       totalStrike: 0,
-      greensHit: 0
+      girs: 0
     };
 
     current.shots += 1;
     current.totalDistance += entry.approachDistance;
     current.totalStrike += entry.strikeRating;
     if (entry.approachOutcome === "GIR") {
-      current.greensHit += 1;
+      current.girs += 1;
     }
 
-    clubTotals.set(clubName, current);
+    clubTotals.set(entry.approachClub, current);
   });
 
-  const cards = [...clubTotals.values()]
+  clubReport.innerHTML = [...clubTotals.values()]
     .sort((a, b) => b.shots - a.shots || a.clubName.localeCompare(b.clubName))
     .map((club) => {
       const avgDistance = Math.round(club.totalDistance / club.shots);
-      const avgStrike = club.totalStrike / club.shots;
-      const girRate = Math.round((club.greensHit / club.shots) * 100);
+      const avgStrike = (club.totalStrike / club.shots).toFixed(1);
+      const girRate = Math.round((club.girs / club.shots) * 100);
 
       return `
         <article class="club-report-card">
@@ -388,14 +462,13 @@ function renderClubReport() {
           </div>
           <div class="club-report-stats">
             <div class="detail-chip"><strong>Avg Distance</strong>${avgDistance} yds</div>
-            <div class="detail-chip"><strong>Avg Strike</strong>${avgStrike.toFixed(1)} / 5</div>
+            <div class="detail-chip"><strong>Avg Strike</strong>${avgStrike} / 5</div>
             <div class="detail-chip"><strong>GIR Rate</strong>${girRate}%</div>
           </div>
         </article>
       `;
-    });
-
-  clubReport.innerHTML = cards.join("");
+    })
+    .join("");
 }
 
 function switchView(targetId) {
@@ -423,10 +496,6 @@ function handleResize() {
 }
 
 function updateSaveFeedback(savedEntry) {
-  if (!saveFeedback) {
-    return;
-  }
-
   if (savedEntry) {
     saveFeedback.textContent = `Saved hole ${savedEntry.hole} for ${savedEntry.roundName}.`;
     return;
@@ -463,7 +532,10 @@ function renderHistory() {
       { label: "Approach", value: `${entry.approachDistance} yds` },
       { label: "Approach club", value: entry.approachClub },
       { label: "Approach result", value: entry.approachOutcome },
-      { label: "Strike", value: `${entry.strikeRating} / 5` }
+      { label: "Strike", value: getStrikeRatingLabel(entry.strikeRating) },
+      { label: "1st putt", value: `${entry.firstPuttDistance} ft` },
+      { label: "Putts", value: String(entry.putts) },
+      { label: "Make <6'", value: entry.makeUnderSix }
     ];
 
     detailItems.forEach((item) => {
@@ -500,6 +572,9 @@ async function exportEntriesAsCsv() {
     "Approach Club",
     "Approach Outcome",
     "Strike Rating",
+    "First Putt Distance",
+    "Number Of Putts",
+    "Make <6'",
     "Notes"
   ];
 
@@ -514,6 +589,9 @@ async function exportEntriesAsCsv() {
     entry.approachClub,
     entry.approachOutcome,
     getStrikeRatingLabel(entry.strikeRating),
+    entry.firstPuttDistance,
+    entry.putts,
+    entry.makeUnderSix,
     entry.notes
   ]);
 
@@ -562,7 +640,10 @@ function loadEntries() {
     return raw
       ? JSON.parse(raw).map((entry) => ({
           ...entry,
-          par: entry.par ? Number(entry.par) : 4
+          par: entry.par ? Number(entry.par) : 4,
+          putts: entry.putts ? Number(entry.putts) : 0,
+          firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
+          makeUnderSix: entry.makeUnderSix || ""
         }))
       : [];
   } catch (error) {
@@ -589,11 +670,8 @@ function saveRoundName(value) {
 }
 
 function syncParView() {
-  const isPar3 = Number(parSelect.value) === 3;
-
+  const isPar3 = Number(parInput.value) === 3;
   teeShotSection.classList.toggle("is-hidden", isPar3);
-  teeClubSelect.required = !isPar3;
-  form.elements.teeOutcome.required = !isPar3;
 }
 
 function normalizeText(value) {

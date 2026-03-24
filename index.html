@@ -73,14 +73,11 @@
                 <input type="number" name="hole" min="1" max="18" required />
               </label>
 
-              <label class="field">
+              <div class="field">
                 <span>Par</span>
-                <select name="par" id="parSelect" required>
-                  <option value="3">3</option>
-                  <option value="4" selected>4</option>
-                  <option value="5">5</option>
-                </select>
-              </label>
+                <input type="hidden" name="par" id="parInput" value="4" />
+                <div id="parGroup" class="option-grid option-grid-three"></div>
+              </div>
             </div>
 
             <div class="entry-section" id="teeShotSection">
@@ -88,28 +85,12 @@
                 <p class="section-kicker">Tee Shot</p>
                 <h3>Start of the hole</h3>
               </div>
+              <input type="hidden" name="teeClub" id="teeClubInput" />
               <div class="club-picker" id="teeClubPicker"></div>
-              <div class="field-grid">
-                <label class="field">
-                  <span>Tee club</span>
-                  <select name="teeClub" id="teeClubSelect" required></select>
-                </label>
-
-                <label class="field">
-                  <span>Where it ended up</span>
-                  <select name="teeOutcome" required>
-                    <option value="">Choose outcome</option>
-                    <option>Fairway</option>
-                    <option>Left rough</option>
-                    <option>Right rough</option>
-                    <option>Fairway bunker</option>
-                    <option>Left trees</option>
-                    <option>Right trees</option>
-                    <option>Penalty area</option>
-                    <option>Out of bounds</option>
-                    <option>Green</option>
-                  </select>
-                </label>
+              <div class="field">
+                <span>Where it ended up</span>
+                <input type="hidden" name="teeOutcome" id="teeOutcomeInput" />
+                <div id="teeOutcomeGroup" class="option-grid option-grid-two"></div>
               </div>
             </div>
 
@@ -130,26 +111,17 @@
                   />
                 </label>
 
-                <label class="field">
+                <div class="field field-span-full">
                   <span>Approach club</span>
-                  <select name="approachClub" id="approachClubSelect" required></select>
-                </label>
+                  <input type="hidden" name="approachClub" id="approachClubInput" />
+                  <div id="approachClubGroup" class="option-grid option-grid-clubs"></div>
+                </div>
 
-                <label class="field">
+                <div class="field field-span-full">
                   <span>Approach result</span>
-                  <select name="approachOutcome" required>
-                    <option value="">Choose result</option>
-                    <option>GIR</option>
-                    <option>Front fringe</option>
-                    <option>Back fringe</option>
-                    <option>Left of green</option>
-                    <option>Right of green</option>
-                    <option>Short of green</option>
-                    <option>Long of green</option>
-                    <option>Greenside bunker</option>
-                    <option>Penalty area</option>
-                  </select>
-                </label>
+                  <input type="hidden" name="approachOutcome" id="approachOutcomeInput" />
+                  <div id="approachOutcomeGroup" class="option-grid option-grid-two"></div>
+                </div>
               </div>
 
               <fieldset class="rating-fieldset">
@@ -166,6 +138,37 @@
                   placeholder="Pulled it slightly, but the strike felt great."
                 ></textarea>
               </label>
+            </div>
+
+            <div class="entry-section">
+              <div class="entry-header">
+                <p class="section-kicker">Putting</p>
+                <h3>Finish the hole</h3>
+              </div>
+              <div class="field-grid">
+                <label class="field">
+                  <span>First putt distance (feet)</span>
+                  <input
+                    type="number"
+                    name="firstPuttDistance"
+                    min="0"
+                    max="200"
+                    required
+                  />
+                </label>
+
+                <div class="field">
+                  <span>Number of putts</span>
+                  <input type="hidden" name="putts" id="puttsInput" />
+                  <div id="puttsGroup" class="option-grid option-grid-three"></div>
+                </div>
+
+                <div class="field">
+                  <span>Make &lt;6'</span>
+                  <input type="hidden" name="makeUnderSix" id="makeUnderSixInput" />
+                  <div id="makeUnderSixGroup" class="option-grid option-grid-two"></div>
+                </div>
+              </div>
             </div>
 
             <div class="form-actions">
@@ -242,6 +245,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260321-approach-order"></script>
+    <script src="./app.js?v=20260324-radio-flow"></script>
   </body>
 </html>

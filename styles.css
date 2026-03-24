@@ -274,6 +274,39 @@ h3 {
   gap: 8px;
 }
 
+.option-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.option-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.option-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-grid-clubs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.option-button {
+  border: 1px solid rgba(50, 43, 34, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.84);
+  min-height: 52px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.option-button.is-selected {
+  border-color: var(--accent);
+  background: rgba(36, 83, 58, 0.12);
+}
+
 .shot-form {
   display: grid;
   gap: 18px;
@@ -357,6 +390,10 @@ h3 {
 .field {
   display: grid;
   gap: 8px;
+}
+
+.field-span-full {
+  grid-column: 1 / -1;
 }
 
 .field span,
@@ -662,6 +699,10 @@ textarea:focus {
 
   .club-report-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .option-grid-clubs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .primary-button {

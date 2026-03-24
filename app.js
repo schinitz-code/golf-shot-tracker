@@ -64,7 +64,7 @@ const strikeRatings = [
   { value: 5, label: "5 Flush" }
 ];
 const puttOptions = ["1", "2", "3"];
-const makeUnderSixOptions = ["Yes", "No"];
+const makeUnderSixOptions = ["Yes", "No", "N/A"];
 
 const form = document.querySelector("#shotForm");
 const roundNameInput = document.querySelector('input[name="roundName"]');

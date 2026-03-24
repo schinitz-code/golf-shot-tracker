@@ -329,13 +329,14 @@ h3 {
 }
 
 .club-tile {
-  border: 1px solid rgba(36, 83, 58, 0.16);
-  background: rgba(255, 255, 255, 0.74);
-  border-radius: 18px;
+  border: 1px solid rgba(50, 43, 34, 0.14);
+  background: rgba(255, 255, 255, 0.84);
+  border-radius: 16px;
   min-height: 52px;
-  padding: 12px 10px;
+  padding: 10px 14px;
   cursor: pointer;
-  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  font-weight: 700;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -343,12 +344,11 @@ h3 {
 .club-tile:focus-visible {
   transform: translateY(-2px);
   border-color: rgba(36, 83, 58, 0.42);
-  box-shadow: 0 12px 22px rgba(36, 83, 58, 0.12);
 }
 
 .club-tile.is-selected {
   border-color: var(--accent);
-  background: rgba(227, 240, 231, 0.95);
+  background: rgba(36, 83, 58, 0.12);
 }
 
 .club-tile img {
@@ -360,9 +360,8 @@ h3 {
 
 .club-tile span {
   display: block;
-  margin-top: 8px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
@@ -374,7 +373,6 @@ h3 {
 
 .club-tile-text span {
   margin-top: 0;
-  font-size: 0.95rem;
 }
 
 .field-grid {

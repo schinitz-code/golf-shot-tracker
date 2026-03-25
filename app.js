@@ -57,11 +57,10 @@ const approachOutcomes = [
   "Penalty area"
 ];
 const strikeRatings = [
-  { value: 1, label: "1 Poor" },
-  { value: 2, label: "2 Thin" },
-  { value: 3, label: "3 Fat" },
-  { value: 4, label: "4 Solid" },
-  { value: 5, label: "5 Flush" }
+  { value: 1, label: "1 Thin" },
+  { value: 2, label: "2 Fat" },
+  { value: 3, label: "3 Solid" },
+  { value: 4, label: "4 Flush" }
 ];
 const puttOptions = ["1", "2", "3"];
 const makeUnderSixOptions = ["Yes", "No", "N/A"];
@@ -649,6 +648,7 @@ function loadEntries() {
       ? JSON.parse(raw).map((entry) => ({
           ...entry,
           par: entry.par ? Number(entry.par) : 4,
+          strikeRating: normalizeStrikeRating(entry.strikeRating),
           putts: entry.putts ? Number(entry.putts) : 0,
           firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
           makeUnderSix: entry.makeUnderSix || ""
@@ -732,6 +732,20 @@ function slugifyFileName(value) {
 function getStrikeRatingLabel(value) {
   const match = strikeRatings.find((rating) => rating.value === Number(value));
   return match ? match.label : String(value ?? "");
+}
+
+function normalizeStrikeRating(value) {
+  const numericValue = Number(value);
+
+  if (numericValue >= 4) {
+    return 4;
+  }
+
+  if (numericValue <= 1 || Number.isNaN(numericValue)) {
+    return 1;
+  }
+
+  return numericValue;
 }
 
 function registerServiceWorker() {

@@ -57,10 +57,10 @@ const approachOutcomes = [
   "Penalty area"
 ];
 const strikeRatings = [
-  { value: 1, label: "1 Thin" },
-  { value: 2, label: "2 Fat" },
-  { value: 3, label: "3 Solid" },
-  { value: 4, label: "4 Flush" }
+  { value: 1, label: "Thin" },
+  { value: 2, label: "Fat" },
+  { value: 3, label: "Average" },
+  { value: 4, label: "Solid" }
 ];
 const puttOptions = ["1", "2", "3"];
 const makeUnderSixOptions = ["Yes", "No", "N/A"];

@@ -8,7 +8,7 @@
   "description": "Track tee shots and approach shots during your rounds.",
   "icons": [
     {
-      "src": "./icon.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     },

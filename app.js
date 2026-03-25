@@ -385,9 +385,14 @@ function renderStats() {
   const averagePutts = entries.length
     ? (entries.reduce((sum, entry) => sum + entry.putts, 0) / entries.length).toFixed(1)
     : "0.0";
-  const makeUnderSixRate = entries.length
+  const makeUnderSixAttempts = entries.filter(
+    (entry) => entry.makeUnderSix === "Yes" || entry.makeUnderSix === "No"
+  );
+  const makeUnderSixRate = makeUnderSixAttempts.length
     ? Math.round(
-        (entries.filter((entry) => entry.makeUnderSix === "Yes").length / entries.length) * 100
+        (makeUnderSixAttempts.filter((entry) => entry.makeUnderSix === "Yes").length /
+          makeUnderSixAttempts.length) *
+          100
       )
     : 0;
 
@@ -402,7 +407,10 @@ function renderStats() {
     { label: "GIR approaches", value: entries.length ? `${Math.round((girs / entries.length) * 100)}%` : "0%" },
     { label: "Avg approach", value: `${averageApproachDistance} yds` },
     { label: "Avg putts", value: `${averagePutts}` },
-    { label: "Make <6'", value: `${makeUnderSixRate}%` },
+    {
+      label: "Make <6'",
+      value: makeUnderSixAttempts.length ? `${makeUnderSixRate}%` : "N/A"
+    },
     { label: "Last saved", value: latestEntry ? formatDate(latestEntry.createdAt) : "None" }
   ];
 

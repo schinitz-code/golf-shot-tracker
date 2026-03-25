@@ -411,11 +411,26 @@ textarea,
 .mobile-nav-button,
 .option-button,
 .club-tile,
+.club-tile span,
 .rating-pill,
 .primary-button,
 .ghost-button,
 .delete-button {
   font: inherit;
+}
+
+.mobile-nav-button,
+.option-button,
+.club-tile,
+.club-tile span,
+.rating-pill,
+.primary-button,
+.ghost-button,
+.delete-button {
+  font-family: "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.2;
 }
 
 input,

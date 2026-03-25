@@ -36,9 +36,9 @@ const approachClubs = [
 const parOptions = ["3", "4", "5"];
 const teeOutcomes = [
   "Fairway",
+  "Fairway bunker",
   "Left rough",
   "Right rough",
-  "Fairway bunker",
   "Left trees",
   "Right trees",
   "Penalty area",
@@ -47,19 +47,19 @@ const teeOutcomes = [
 ];
 const approachOutcomes = [
   "GIR",
-  "Front fringe",
-  "Back fringe",
+  "Greenside bunker",
   "Left of green",
   "Right of green",
+  "Front fringe",
+  "Back fringe",
   "Short of green",
   "Long of green",
-  "Greenside bunker",
   "Penalty area"
 ];
 const strikeRatings = [
   { value: 1, label: "Thin" },
   { value: 2, label: "Fat" },
-  { value: 3, label: "Average" },
+  { value: 3, label: "Standard" },
   { value: 4, label: "Solid" }
 ];
 const puttOptions = ["1", "2", "3"];

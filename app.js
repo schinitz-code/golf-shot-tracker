@@ -572,12 +572,13 @@ function scrollPanelIntoView(targetId) {
     return;
   }
 
-  const topOffset = targetId === "entryPanel" ? 0 : 12;
-  const targetTop = window.scrollY + targetPanel.getBoundingClientRect().top - topOffset;
+  requestAnimationFrame(() => {
+    const panelTop = window.scrollY + targetPanel.getBoundingClientRect().top;
 
-  window.scrollTo({
-    top: Math.max(targetTop, 0),
-    behavior: "smooth"
+    window.scrollTo({
+      top: Math.max(panelTop - 12, 0),
+      behavior: "smooth"
+    });
   });
 }
 

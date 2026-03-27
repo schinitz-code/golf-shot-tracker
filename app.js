@@ -4,7 +4,7 @@ const ROUND_NAME_STORAGE_KEY = "golf-shot-tracker-round-name";
 const teeClubs = [
   { name: "Driver" },
   { name: "Mini Driver" },
-  { name: "3 Wood" },
+  { name: "4 Wood" },
   { name: "7 Wood" },
   { name: "5 Iron" },
   { name: "6 Iron" },
@@ -30,7 +30,7 @@ const approachClubs = [
   { name: "6 Iron" },
   { name: "5 Iron" },
   { name: "7 Wood" },
-  { name: "3 Wood" }
+  { name: "4 Wood" }
 ];
 
 const parOptions = ["3", "4", "5"];
@@ -42,26 +42,26 @@ const teeOutcomes = [
   "Left trees",
   "Right trees",
   "Penalty area",
-  "Out of bounds",
-  "Green"
+  "Out of bounds"
 ];
 const approachOutcomes = [
   "GIR",
   "Greenside bunker",
-  "Left of green",
-  "Right of green",
-  "Front fringe",
-  "Back fringe",
-  "Short of green",
-  "Long of green",
+  "Left",
+  "Right",
+  "Fringe",
+  "Rough",
+  "Pin high",
+  "Short",
+  "Long",
   "Penalty area"
 ];
 const strikeRatings = [
-  { value: 1, label: "Thin" },
-  { value: 2, label: "Fat" },
-  { value: 3, label: "Standard" },
-  { value: 4, label: "Solid" }
+  { value: 1, label: "Flush" },
+  { value: 2, label: "OK" },
+  { value: 3, label: "Miss" }
 ];
+const shotResultOptions = ["Good", "Bad"];
 const puttOptions = ["1", "2", "3"];
 const makeUnderSixOptions = ["Yes", "No", "N/A"];
 
@@ -78,6 +78,8 @@ const approachClubInput = document.querySelector("#approachClubInput");
 const approachClubGroup = document.querySelector("#approachClubGroup");
 const approachOutcomeInput = document.querySelector("#approachOutcomeInput");
 const approachOutcomeGroup = document.querySelector("#approachOutcomeGroup");
+const shotResultInput = document.querySelector("#shotResultInput");
+const shotResultGroup = document.querySelector("#shotResultGroup");
 const strikeRatingGroup = document.querySelector("#strikeRatingGroup");
 const puttsInput = document.querySelector("#puttsInput");
 const puttsGroup = document.querySelector("#puttsGroup");
@@ -97,7 +99,8 @@ const saveFeedback = document.querySelector("#saveFeedback");
 const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
 
-let selectedStrikeRating = 3;
+let selectedStrikeRating = 2;
+let selectedApproachOutcomes = ["GIR"];
 let entries = loadEntries();
 let currentView = "entryPanel";
 
@@ -108,7 +111,8 @@ function bootstrap() {
   renderOptionGroup(parGroup, parInput, parOptions, "option-button", syncParView);
   renderOptionGroup(teeOutcomeGroup, teeOutcomeInput, teeOutcomes);
   renderOptionGroup(approachClubGroup, approachClubInput, approachClubs.map((club) => club.name));
-  renderOptionGroup(approachOutcomeGroup, approachOutcomeInput, approachOutcomes);
+  renderMultiSelectGroup(approachOutcomeGroup, approachOutcomes, selectedApproachOutcomes);
+  renderOptionGroup(shotResultGroup, shotResultInput, shotResultOptions);
   renderOptionGroup(puttsGroup, puttsInput, puttOptions, "option-button");
   renderOptionGroup(makeUnderSixGroup, makeUnderSixInput, makeUnderSixOptions, "option-button");
   renderStrikeOptions();
@@ -171,6 +175,24 @@ function renderOptionGroup(container, input, options, buttonClass = "option-butt
   });
 }
 
+function renderMultiSelectGroup(container, options, selectedValues) {
+  container.innerHTML = "";
+
+  options.forEach((option) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "option-button";
+    button.dataset.value = option;
+    button.textContent = option;
+    button.addEventListener("click", () => {
+      toggleApproachOutcome(option);
+    });
+    container.appendChild(button);
+  });
+
+  syncMultiSelectButtons(container, selectedValues);
+}
+
 function renderStrikeOptions() {
   strikeRatingGroup.innerHTML = "";
 
@@ -196,6 +218,13 @@ function syncOptionButtons(container, selectedValue) {
   });
 }
 
+function syncMultiSelectButtons(container, selectedValues) {
+  const selectedSet = new Set(selectedValues);
+  container.querySelectorAll("button").forEach((button) => {
+    button.classList.toggle("is-selected", selectedSet.has(button.dataset.value));
+  });
+}
+
 function syncClubPicker() {
   teeClubPicker.querySelectorAll(".club-tile").forEach((button) => {
     button.classList.toggle("is-selected", button.dataset.value === teeClubInput.value);
@@ -206,6 +235,17 @@ function syncStrikeButtons() {
   strikeRatingGroup.querySelectorAll(".rating-pill").forEach((button) => {
     button.classList.toggle("is-active", Number(button.dataset.value) === selectedStrikeRating);
   });
+}
+
+function toggleApproachOutcome(value) {
+  if (selectedApproachOutcomes.includes(value)) {
+    selectedApproachOutcomes = selectedApproachOutcomes.filter((item) => item !== value);
+  } else {
+    selectedApproachOutcomes = [...selectedApproachOutcomes, value];
+  }
+
+  approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
+  syncMultiSelectButtons(approachOutcomeGroup, selectedApproachOutcomes);
 }
 
 function handleSubmit(event) {
@@ -222,7 +262,7 @@ function handleSubmit(event) {
   if (!approachClubInput.value) {
     missingSelections.push("approach club");
   }
-  if (!approachOutcomeInput.value) {
+  if (!selectedApproachOutcomes.length) {
     missingSelections.push("approach result");
   }
   if (!puttsInput.value) {
@@ -230,6 +270,9 @@ function handleSubmit(event) {
   }
   if (!makeUnderSixInput.value) {
     missingSelections.push("make under 6 feet");
+  }
+  if (!shotResultInput.value) {
+    missingSelections.push("result");
   }
   if (!isPar3 && !teeClubInput.value) {
     missingSelections.push("tee club");
@@ -261,7 +304,8 @@ function handleSubmit(event) {
     teeOutcome: isPar3 ? "Not tracked" : teeOutcomeInput.value,
     approachDistance: Number(data.get("approachDistance")),
     approachClub: approachClubInput.value,
-    approachOutcome: approachOutcomeInput.value,
+    approachOutcome: [...selectedApproachOutcomes],
+    shotResult: shotResultInput.value,
     strikeRating: selectedStrikeRating,
     firstPuttDistance: Number(data.get("firstPuttDistance")),
     putts: Number(puttsInput.value),
@@ -287,15 +331,18 @@ function resetForm() {
   teeClubInput.value = "";
   teeOutcomeInput.value = "";
   approachClubInput.value = "";
-  approachOutcomeInput.value = "";
-  puttsInput.value = "";
+  selectedApproachOutcomes = ["GIR"];
+  approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
+  shotResultInput.value = "";
+  puttsInput.value = "2";
   makeUnderSixInput.value = "";
-  selectedStrikeRating = 3;
+  selectedStrikeRating = 2;
 
   syncOptionButtons(parGroup, parInput.value);
   syncOptionButtons(teeOutcomeGroup, teeOutcomeInput.value);
   syncOptionButtons(approachClubGroup, approachClubInput.value);
-  syncOptionButtons(approachOutcomeGroup, approachOutcomeInput.value);
+  syncMultiSelectButtons(approachOutcomeGroup, selectedApproachOutcomes);
+  syncOptionButtons(shotResultGroup, shotResultInput.value);
   syncOptionButtons(puttsGroup, puttsInput.value);
   syncOptionButtons(makeUnderSixGroup, makeUnderSixInput.value);
   syncClubPicker();
@@ -377,7 +424,7 @@ function renderStats() {
   const latestEntry = getLatestEntry();
   const teeOpportunities = entries.filter((entry) => entry.par !== 3);
   const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
-  const girs = entries.filter((entry) => entry.approachOutcome === "GIR").length;
+  const girs = entries.filter((entry) => getApproachOutcomeList(entry).includes("GIR")).length;
   const averageApproachDistance = entries.length
     ? Math.round(entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length)
     : 0;
@@ -387,6 +434,7 @@ function renderStats() {
   const makeUnderSixAttempts = entries.filter(
     (entry) => entry.makeUnderSix === "Yes" || entry.makeUnderSix === "No"
   );
+  const goodResults = entries.filter((entry) => entry.shotResult === "Good").length;
   const makeUnderSixRate = makeUnderSixAttempts.length
     ? Math.round(
         (makeUnderSixAttempts.filter((entry) => entry.makeUnderSix === "Yes").length /
@@ -406,6 +454,7 @@ function renderStats() {
     { label: "GIR approaches", value: entries.length ? `${Math.round((girs / entries.length) * 100)}%` : "0%" },
     { label: "Avg approach", value: `${averageApproachDistance} yds` },
     { label: "Avg putts", value: `${averagePutts}` },
+    { label: "Good result", value: entries.length ? `${Math.round((goodResults / entries.length) * 100)}%` : "0%" },
     {
       label: "Make <6'",
       value: makeUnderSixAttempts.length ? `${makeUnderSixRate}%` : "N/A"
@@ -447,7 +496,7 @@ function renderClubReport() {
     current.shots += 1;
     current.totalDistance += entry.approachDistance;
     current.totalStrike += entry.strikeRating;
-    if (entry.approachOutcome === "GIR") {
+    if (getApproachOutcomeList(entry).includes("GIR")) {
       current.girs += 1;
     }
 
@@ -538,7 +587,8 @@ function renderHistory() {
       { label: "Tee result", value: entry.teeOutcome },
       { label: "Approach", value: `${entry.approachDistance} yds` },
       { label: "Approach club", value: entry.approachClub },
-      { label: "Approach result", value: entry.approachOutcome },
+      { label: "Approach result", value: formatApproachOutcome(entry.approachOutcome) },
+      { label: "Result", value: entry.shotResult },
       { label: "Strike", value: getStrikeRatingLabel(entry.strikeRating) },
       { label: "1st putt", value: `${entry.firstPuttDistance} ft` },
       { label: "Putts", value: String(entry.putts) },
@@ -578,6 +628,7 @@ async function exportEntriesAsCsv() {
     "Approach Distance",
     "Approach Club",
     "Approach Outcome",
+    "Result",
     "Strike Rating",
     "First Putt Distance",
     "Number Of Putts",
@@ -594,7 +645,8 @@ async function exportEntriesAsCsv() {
     entry.teeOutcome,
     entry.approachDistance,
     entry.approachClub,
-    entry.approachOutcome,
+    formatApproachOutcome(entry.approachOutcome),
+    entry.shotResult,
     getStrikeRatingLabel(entry.strikeRating),
     entry.firstPuttDistance,
     entry.putts,
@@ -651,6 +703,8 @@ function loadEntries() {
           strikeRating: normalizeStrikeRating(entry.strikeRating),
           putts: entry.putts ? Number(entry.putts) : 0,
           firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
+          approachOutcome: getApproachOutcomeList(entry),
+          shotResult: entry.shotResult || "",
           makeUnderSix: entry.makeUnderSix || ""
         }))
       : [];
@@ -734,11 +788,30 @@ function getStrikeRatingLabel(value) {
   return match ? match.label : String(value ?? "");
 }
 
+function getApproachOutcomeList(value) {
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  if (!value) {
+    return [];
+  }
+
+  return String(value)
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function formatApproachOutcome(value) {
+  return getApproachOutcomeList(value).join(", ");
+}
+
 function normalizeStrikeRating(value) {
   const numericValue = Number(value);
 
   if (numericValue >= 4) {
-    return 4;
+    return 3;
   }
 
   if (numericValue <= 1 || Number.isNaN(numericValue)) {

@@ -448,7 +448,7 @@ textarea {
 
 textarea {
   resize: vertical;
-  min-height: 110px;
+  min-height: 72px;
 }
 
 input:focus,

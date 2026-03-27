@@ -678,15 +678,16 @@ async function exportEntriesAsCsv() {
 
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const latestEntry = getLatestEntry();
-  const baseName = latestEntry?.roundName || "golf-round";
-  const fileName = `${slugifyFileName(baseName)}-shots.csv`;
+  const currentRoundName = normalizeText(roundNameInput.value);
+  const baseName = currentRoundName || latestEntry?.roundName || "Golf course data";
+  const fileName = `${slugifyFileName(baseName)}.csv`;
 
   if (navigator.share && typeof File !== "undefined") {
     const file = new File([blob], fileName, { type: "text/csv" });
 
     try {
       await navigator.share({
-        title: "Golf Shot Tracker Export",
+        title: baseName,
         files: [file]
       });
       return;

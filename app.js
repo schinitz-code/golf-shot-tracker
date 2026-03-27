@@ -101,7 +101,7 @@ const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
 
 let selectedStrikeRating = 2;
-let selectedApproachOutcomes = ["GIR"];
+let selectedApproachOutcomes = [];
 let entries = loadEntries();
 let currentView = "entryPanel";
 
@@ -338,7 +338,7 @@ function resetFormWithHole(holeNumber) {
   teeClubInput.value = "";
   teeOutcomeInput.value = "";
   approachClubInput.value = "";
-  selectedApproachOutcomes = ["GIR"];
+  selectedApproachOutcomes = [];
   approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
   shotResultInput.value = "Good";
   puttsInput.value = "2";

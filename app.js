@@ -546,6 +546,7 @@ function switchView(targetId) {
       panel.hidden = false;
     });
     navButtons.forEach((button) => button.classList.remove("is-active"));
+    scrollPanelIntoView(targetId);
     return;
   }
 
@@ -556,10 +557,28 @@ function switchView(targetId) {
   navButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.viewTarget === targetId);
   });
+
+  scrollPanelIntoView(targetId);
 }
 
 function handleResize() {
   switchView(currentView);
+}
+
+function scrollPanelIntoView(targetId) {
+  const targetPanel = document.querySelector(`#${targetId}`);
+
+  if (!targetPanel) {
+    return;
+  }
+
+  const topOffset = targetId === "entryPanel" ? 0 : 12;
+  const targetTop = window.scrollY + targetPanel.getBoundingClientRect().top - topOffset;
+
+  window.scrollTo({
+    top: Math.max(targetTop, 0),
+    behavior: "smooth"
+  });
 }
 
 function scrollAppToTop() {

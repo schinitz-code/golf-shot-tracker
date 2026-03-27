@@ -67,6 +67,7 @@ const makeUnderSixOptions = ["Yes", "No", "N/A"];
 
 const form = document.querySelector("#shotForm");
 const roundNameInput = document.querySelector('input[name="roundName"]');
+const holeInput = document.querySelector('input[name="hole"]');
 const parInput = document.querySelector("#parInput");
 const parGroup = document.querySelector("#parGroup");
 const teeShotSection = document.querySelector("#teeShotSection");
@@ -316,17 +317,22 @@ function handleSubmit(event) {
   entries = [entry, ...entries];
 
   persistEntries();
-  resetForm();
+  prepareNextHole(entry.hole + 1);
   updateSaveFeedback(entry);
   render();
   switchView("statsPanel");
 }
 
 function resetForm() {
+  resetFormWithHole(1);
+}
+
+function resetFormWithHole(holeNumber) {
   const savedRoundName = loadSavedRoundName();
 
   form.reset();
   roundNameInput.value = savedRoundName;
+  holeInput.value = String(Math.min(Math.max(holeNumber, 1), 18));
   parInput.value = "4";
   teeClubInput.value = "";
   teeOutcomeInput.value = "";
@@ -351,6 +357,10 @@ function resetForm() {
   updateSaveFeedback();
 }
 
+function prepareNextHole(nextHoleNumber) {
+  resetFormWithHole(nextHoleNumber > 18 ? 18 : nextHoleNumber);
+}
+
 function clearAllEntries() {
   const confirmed = window.confirm("Delete all saved golf shot entries?");
 
@@ -367,7 +377,7 @@ function clearAllEntries() {
 
 function startNewRound() {
   localStorage.removeItem(ROUND_NAME_STORAGE_KEY);
-  resetForm();
+  resetFormWithHole(1);
   roundNameInput.focus();
 }
 

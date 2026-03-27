@@ -321,6 +321,7 @@ function handleSubmit(event) {
   updateSaveFeedback(entry);
   render();
   switchView("statsPanel");
+  scrollAppToTop();
 }
 
 function resetForm() {
@@ -559,6 +560,13 @@ function switchView(targetId) {
 
 function handleResize() {
   switchView(currentView);
+}
+
+function scrollAppToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
 function updateSaveFeedback(savedEntry) {

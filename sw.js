@@ -1,4 +1,4 @@
-const CACHE_NAME = "golf-shot-tracker-v25";
+const CACHE_NAME = "golf-shot-tracker-v26";
 const APP_ASSETS = [
   "./",
   "./index.html",

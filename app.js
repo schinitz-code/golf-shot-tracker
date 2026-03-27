@@ -46,14 +46,14 @@ const teeOutcomes = [
 ];
 const approachOutcomes = [
   "GIR",
-  "Greenside bunker",
+  "Pin high",
   "Left",
   "Right",
   "Fringe",
   "Rough",
-  "Pin high",
-  "Short",
   "Long",
+  "Short",
+  "Greenside bunker",
   "Penalty area"
 ];
 const strikeRatings = [

@@ -1,6 +1,6 @@
 {
-  "name": "Golf Shot Tracker",
-  "short_name": "Golf Tracker",
+  "name": "Shot tracker",
+  "short_name": "Shot tracker",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#efe5cf",

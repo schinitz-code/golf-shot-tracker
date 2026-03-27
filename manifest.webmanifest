@@ -1,6 +1,6 @@
 {
-  "name": "Shot tracker",
-  "short_name": "Shot tracker",
+  "name": "Shot Tracker",
+  "short_name": "Shot Tracker",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#efe5cf",

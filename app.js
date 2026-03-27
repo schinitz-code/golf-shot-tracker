@@ -272,7 +272,7 @@ function handleSubmit(event) {
   if (!makeUnderSixInput.value) {
     missingSelections.push("make under 6 feet");
   }
-  if (!shotResultInput.value) {
+  if (!isPar3 && !shotResultInput.value) {
     missingSelections.push("result");
   }
   if (!isPar3 && !teeClubInput.value) {
@@ -306,7 +306,7 @@ function handleSubmit(event) {
     approachDistance: Number(data.get("approachDistance")),
     approachClub: approachClubInput.value,
     approachOutcome: [...selectedApproachOutcomes],
-    shotResult: shotResultInput.value,
+    shotResult: isPar3 ? "N/A (Par 3)" : shotResultInput.value,
     strikeRating: selectedStrikeRating,
     firstPuttDistance: Number(data.get("firstPuttDistance")),
     putts: Number(puttsInput.value),
@@ -339,7 +339,7 @@ function resetFormWithHole(holeNumber) {
   approachClubInput.value = "";
   selectedApproachOutcomes = ["GIR"];
   approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
-  shotResultInput.value = "";
+  shotResultInput.value = "Good";
   puttsInput.value = "2";
   makeUnderSixInput.value = "";
   selectedStrikeRating = 2;

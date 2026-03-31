@@ -97,6 +97,7 @@ const clearAllButton = document.querySelector("#clearAllButton");
 const exportButton = document.querySelector("#exportButton");
 const historyTemplate = document.querySelector("#historyItemTemplate");
 const saveFeedback = document.querySelector("#saveFeedback");
+const mobileNav = document.querySelector(".mobile-nav");
 const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
 
@@ -573,10 +574,21 @@ function scrollPanelIntoView(targetId) {
   }
 
   requestAnimationFrame(() => {
+    if (targetId === "entryPanel") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+      return;
+    }
+
+    const navOffset = mobileNav && getComputedStyle(mobileNav).display !== "none"
+      ? mobileNav.offsetHeight + 24
+      : 24;
     const panelTop = window.scrollY + targetPanel.getBoundingClientRect().top;
 
     window.scrollTo({
-      top: Math.max(panelTop - 12, 0),
+      top: Math.max(panelTop - navOffset, 0),
       behavior: "smooth"
     });
   });

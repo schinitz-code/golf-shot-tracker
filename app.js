@@ -62,7 +62,7 @@ const strikeRatings = [
   { value: 3, label: "Miss" }
 ];
 const shotResultOptions = ["Good", "Bad"];
-const puttOptions = ["1", "2", "3"];
+const puttOptions = ["0", "1", "2", "3"];
 const makeUnderSixOptions = ["Yes", "No", "N/A"];
 
 const form = document.querySelector("#shotForm");
@@ -75,6 +75,11 @@ const teeClubPicker = document.querySelector("#teeClubPicker");
 const teeClubInput = document.querySelector("#teeClubInput");
 const teeOutcomeInput = document.querySelector("#teeOutcomeInput");
 const teeOutcomeGroup = document.querySelector("#teeOutcomeGroup");
+const secondShotSection = document.querySelector("#secondShotSection");
+const secondShotClubInput = document.querySelector("#secondShotClubInput");
+const secondShotClubGroup = document.querySelector("#secondShotClubGroup");
+const secondShotOutcomeInput = document.querySelector("#secondShotOutcomeInput");
+const secondShotOutcomeGroup = document.querySelector("#secondShotOutcomeGroup");
 const approachClubInput = document.querySelector("#approachClubInput");
 const approachClubGroup = document.querySelector("#approachClubGroup");
 const approachOutcomeInput = document.querySelector("#approachOutcomeInput");
@@ -112,6 +117,8 @@ function bootstrap() {
   renderTeeClubPicker();
   renderOptionGroup(parGroup, parInput, parOptions, "option-button", syncParView);
   renderOptionGroup(teeOutcomeGroup, teeOutcomeInput, teeOutcomes);
+  renderOptionGroup(secondShotClubGroup, secondShotClubInput, approachClubs.map((club) => club.name));
+  renderOptionGroup(secondShotOutcomeGroup, secondShotOutcomeInput, teeOutcomes);
   renderOptionGroup(approachClubGroup, approachClubInput, approachClubs.map((club) => club.name));
   renderMultiSelectGroup(approachOutcomeGroup, approachOutcomes, selectedApproachOutcomes);
   renderOptionGroup(shotResultGroup, shotResultInput, shotResultOptions);
@@ -259,6 +266,7 @@ function handleSubmit(event) {
 
   const par = Number(parInput.value || "4");
   const isPar3 = par === 3;
+  const isPar5 = par === 5;
   const missingSelections = [];
 
   if (!approachClubInput.value) {
@@ -282,6 +290,12 @@ function handleSubmit(event) {
   if (!isPar3 && !teeOutcomeInput.value) {
     missingSelections.push("tee result");
   }
+  if (isPar5 && !secondShotClubInput.value) {
+    missingSelections.push("second shot club");
+  }
+  if (isPar5 && !secondShotOutcomeInput.value) {
+    missingSelections.push("second shot result");
+  }
 
   if (missingSelections.length) {
     window.alert(`Please select: ${missingSelections.join(", ")}.`);
@@ -304,6 +318,8 @@ function handleSubmit(event) {
     par,
     teeClub: isPar3 ? "N/A (Par 3)" : teeClubInput.value,
     teeOutcome: isPar3 ? "Not tracked" : teeOutcomeInput.value,
+    secondShotClub: isPar5 ? secondShotClubInput.value : "N/A",
+    secondShotOutcome: isPar5 ? secondShotOutcomeInput.value : "N/A",
     approachDistance: Number(data.get("approachDistance")),
     approachClub: approachClubInput.value,
     approachOutcome: [...selectedApproachOutcomes],
@@ -321,8 +337,11 @@ function handleSubmit(event) {
   prepareNextHole(entry.hole + 1);
   updateSaveFeedback(entry);
   render();
-  switchView("statsPanel");
-  scrollAppToTop();
+  if (entry.hole >= 18) {
+    switchView("statsPanel");
+  } else {
+    switchView("entryPanel");
+  }
 }
 
 function resetForm() {
@@ -338,6 +357,8 @@ function resetFormWithHole(holeNumber) {
   parInput.value = "4";
   teeClubInput.value = "";
   teeOutcomeInput.value = "";
+  secondShotClubInput.value = "";
+  secondShotOutcomeInput.value = "";
   approachClubInput.value = "";
   selectedApproachOutcomes = [];
   approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
@@ -348,6 +369,8 @@ function resetFormWithHole(holeNumber) {
 
   syncOptionButtons(parGroup, parInput.value);
   syncOptionButtons(teeOutcomeGroup, teeOutcomeInput.value);
+  syncOptionButtons(secondShotClubGroup, secondShotClubInput.value);
+  syncOptionButtons(secondShotOutcomeGroup, secondShotOutcomeInput.value);
   syncOptionButtons(approachClubGroup, approachClubInput.value);
   syncMultiSelectButtons(approachOutcomeGroup, selectedApproachOutcomes);
   syncOptionButtons(shotResultGroup, shotResultInput.value);
@@ -380,6 +403,7 @@ function clearAllEntries() {
 function startNewRound() {
   localStorage.removeItem(ROUND_NAME_STORAGE_KEY);
   resetFormWithHole(1);
+  switchView("entryPanel");
   roundNameInput.focus();
 }
 
@@ -436,7 +460,7 @@ function renderStats() {
   const latestEntry = getLatestEntry();
   const teeOpportunities = entries.filter((entry) => entry.par !== 3);
   const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
-  const girs = entries.filter((entry) => getApproachOutcomeList(entry).includes("GIR")).length;
+  const girs = entries.filter((entry) => getApproachOutcomeList(entry.approachOutcome).includes("GIR")).length;
   const averageApproachDistance = entries.length
     ? Math.round(entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length)
     : 0;
@@ -508,7 +532,7 @@ function renderClubReport() {
     current.shots += 1;
     current.totalDistance += entry.approachDistance;
     current.totalStrike += entry.strikeRating;
-    if (getApproachOutcomeList(entry).includes("GIR")) {
+    if (getApproachOutcomeList(entry.approachOutcome).includes("GIR")) {
       current.girs += 1;
     }
 
@@ -542,12 +566,20 @@ function renderClubReport() {
 function switchView(targetId) {
   currentView = targetId;
 
+  applyViewState(targetId);
+  scrollPanelIntoView(targetId);
+}
+
+function handleResize() {
+  applyViewState(currentView);
+}
+
+function applyViewState(targetId) {
   if (window.innerWidth >= 1180) {
     panels.forEach((panel) => {
       panel.hidden = false;
     });
     navButtons.forEach((button) => button.classList.remove("is-active"));
-    scrollPanelIntoView(targetId);
     return;
   }
 
@@ -558,12 +590,6 @@ function switchView(targetId) {
   navButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.viewTarget === targetId);
   });
-
-  scrollPanelIntoView(targetId);
-}
-
-function handleResize() {
-  switchView(currentView);
 }
 
 function scrollPanelIntoView(targetId) {
@@ -635,6 +661,8 @@ function renderHistory() {
       { label: "Par", value: String(entry.par) },
       { label: "Tee club", value: entry.teeClub },
       { label: "Tee result", value: entry.teeOutcome },
+      { label: "2nd shot club", value: entry.secondShotClub || "N/A" },
+      { label: "2nd shot result", value: entry.secondShotOutcome || "N/A" },
       { label: "Approach", value: `${entry.approachDistance} yds` },
       { label: "Approach club", value: entry.approachClub },
       { label: "Approach result", value: formatApproachOutcome(entry.approachOutcome) },
@@ -675,6 +703,8 @@ async function exportEntriesAsCsv() {
     "Date",
     "Tee Club",
     "Tee Outcome",
+    "Second Shot Club",
+    "Second Shot Outcome",
     "Approach Distance",
     "Approach Club",
     "Approach Outcome",
@@ -693,6 +723,8 @@ async function exportEntriesAsCsv() {
     formatExportDate(entry.createdAt),
     entry.teeClub,
     entry.teeOutcome,
+    entry.secondShotClub || "N/A",
+    entry.secondShotOutcome || "N/A",
     entry.approachDistance,
     entry.approachClub,
     formatApproachOutcome(entry.approachOutcome),
@@ -754,7 +786,9 @@ function loadEntries() {
           strikeRating: normalizeStrikeRating(entry.strikeRating),
           putts: entry.putts ? Number(entry.putts) : 0,
           firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
-          approachOutcome: getApproachOutcomeList(entry),
+          secondShotClub: entry.secondShotClub || "N/A",
+          secondShotOutcome: entry.secondShotOutcome || "N/A",
+          approachOutcome: getApproachOutcomeList(entry.approachOutcome),
           shotResult: entry.shotResult || "",
           makeUnderSix: entry.makeUnderSix || ""
         }))
@@ -783,8 +817,11 @@ function saveRoundName(value) {
 }
 
 function syncParView() {
-  const isPar3 = Number(parInput.value) === 3;
+  const par = Number(parInput.value);
+  const isPar3 = par === 3;
+  const isPar5 = par === 5;
   teeShotSection.classList.toggle("is-hidden", isPar3);
+  secondShotSection.classList.toggle("is-hidden", !isPar5);
 }
 
 function normalizeText(value) {

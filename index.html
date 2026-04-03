@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Shot Tracker" />
     <link rel="apple-touch-icon" href="./icon-512.png?v=20260326-shot-tracker-name" />
     <link rel="manifest" href="./manifest.webmanifest?v=20260326-shot-tracker-name" />
-    <link rel="stylesheet" href="./styles.css?v=20260326-round-flow-tweaks" />
+    <link rel="stylesheet" href="./styles.css?v=20260403-round-flow-second-shot" />
   </head>
   <body>
     <main class="app-shell">
@@ -93,6 +93,24 @@
               </div>
             </div>
 
+            <div class="entry-section is-hidden" id="secondShotSection">
+              <div class="entry-header">
+                <p class="section-kicker">Second Shot</p>
+                <h3>Advance the hole</h3>
+              </div>
+              <div class="field field-span-full">
+                <span>Second shot club</span>
+                <input type="hidden" name="secondShotClub" id="secondShotClubInput" />
+                <div id="secondShotClubGroup" class="option-grid option-grid-clubs"></div>
+              </div>
+
+              <div class="field">
+                <span>Where it ended up</span>
+                <input type="hidden" name="secondShotOutcome" id="secondShotOutcomeInput" />
+                <div id="secondShotOutcomeGroup" class="option-grid option-grid-two"></div>
+              </div>
+            </div>
+
             <div class="entry-section">
               <div class="entry-header">
                 <p class="section-kicker">Approach Shot</p>
@@ -127,16 +145,6 @@
                 <legend>Strike rating</legend>
                 <div id="strikeRatingGroup" class="rating-row"></div>
               </fieldset>
-
-              <label class="field">
-                <span>Notes</span>
-                <textarea
-                  name="notes"
-                  rows="2"
-                  maxlength="140"
-                  placeholder="Pulled it slightly, but the strike felt great."
-                ></textarea>
-              </label>
             </div>
 
             <div class="entry-section">
@@ -159,7 +167,7 @@
                 <div class="field">
                   <span>Number of putts</span>
                   <input type="hidden" name="putts" id="puttsInput" />
-                  <div id="puttsGroup" class="option-grid option-grid-three"></div>
+                  <div id="puttsGroup" class="option-grid option-grid-four"></div>
                 </div>
 
                 <div class="field">
@@ -168,6 +176,22 @@
                   <div id="makeUnderSixGroup" class="option-grid option-grid-three"></div>
                 </div>
               </div>
+            </div>
+
+            <div class="entry-section">
+              <div class="entry-header">
+                <p class="section-kicker">Notes</p>
+                <h3>Anything to remember?</h3>
+              </div>
+              <label class="field">
+                <span>Notes</span>
+                <textarea
+                  name="notes"
+                  rows="2"
+                  maxlength="140"
+                  placeholder="Pulled it slightly, but the strike felt great."
+                ></textarea>
+              </label>
             </div>
 
             <div class="form-actions">
@@ -256,6 +280,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260330-tab-scroll-offset-fix"></script>
+    <script src="./app.js?v=20260403-round-flow-second-shot-v2"></script>
   </body>
 </html>

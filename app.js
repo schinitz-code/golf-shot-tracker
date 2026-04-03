@@ -33,6 +33,21 @@ const approachClubs = [
   { name: "4 Wood" }
 ];
 
+const secondShotClubs = [
+  { name: "4 Wood" },
+  { name: "7 Wood" },
+  { name: "5 Iron" },
+  { name: "6 Iron" },
+  { name: "7 Iron" },
+  { name: "8 Iron" },
+  { name: "9 Iron" },
+  { name: "Pitching Wedge" },
+  { name: "48 Degree Wedge" },
+  { name: "52 Degree Wedge" },
+  { name: "56 Degree Wedge" },
+  { name: "60 Degree Wedge" }
+];
+
 const parOptions = ["3", "4", "5"];
 const teeOutcomes = [
   "Fairway",
@@ -80,6 +95,7 @@ const secondShotClubInput = document.querySelector("#secondShotClubInput");
 const secondShotClubGroup = document.querySelector("#secondShotClubGroup");
 const secondShotOutcomeInput = document.querySelector("#secondShotOutcomeInput");
 const secondShotOutcomeGroup = document.querySelector("#secondShotOutcomeGroup");
+const secondShotStrikeRatingGroup = document.querySelector("#secondShotStrikeRatingGroup");
 const approachClubInput = document.querySelector("#approachClubInput");
 const approachClubGroup = document.querySelector("#approachClubGroup");
 const approachOutcomeInput = document.querySelector("#approachOutcomeInput");
@@ -107,6 +123,7 @@ const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
 
 let selectedStrikeRating = 2;
+let selectedSecondShotStrikeRating = 2;
 let selectedApproachOutcomes = [];
 let entries = loadEntries();
 let currentView = "entryPanel";
@@ -117,7 +134,7 @@ function bootstrap() {
   renderTeeClubPicker();
   renderOptionGroup(parGroup, parInput, parOptions, "option-button", syncParView);
   renderOptionGroup(teeOutcomeGroup, teeOutcomeInput, teeOutcomes);
-  renderOptionGroup(secondShotClubGroup, secondShotClubInput, approachClubs.map((club) => club.name));
+  renderOptionGroup(secondShotClubGroup, secondShotClubInput, secondShotClubs.map((club) => club.name));
   renderOptionGroup(secondShotOutcomeGroup, secondShotOutcomeInput, teeOutcomes);
   renderOptionGroup(approachClubGroup, approachClubInput, approachClubs.map((club) => club.name));
   renderMultiSelectGroup(approachOutcomeGroup, approachOutcomes, selectedApproachOutcomes);
@@ -125,6 +142,7 @@ function bootstrap() {
   renderOptionGroup(puttsGroup, puttsInput, puttOptions, "option-button");
   renderOptionGroup(makeUnderSixGroup, makeUnderSixInput, makeUnderSixOptions, "option-button");
   renderStrikeOptions();
+  renderSecondShotStrikeOptions();
 
   form.addEventListener("submit", handleSubmit);
   resetFormButton.addEventListener("click", resetForm);
@@ -221,6 +239,25 @@ function renderStrikeOptions() {
   syncStrikeButtons();
 }
 
+function renderSecondShotStrikeOptions() {
+  secondShotStrikeRatingGroup.innerHTML = "";
+
+  strikeRatings.forEach((rating) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "rating-pill";
+    button.textContent = rating.label;
+    button.dataset.value = String(rating.value);
+    button.addEventListener("click", () => {
+      selectedSecondShotStrikeRating = rating.value;
+      syncSecondShotStrikeButtons();
+    });
+    secondShotStrikeRatingGroup.appendChild(button);
+  });
+
+  syncSecondShotStrikeButtons();
+}
+
 function syncOptionButtons(container, selectedValue) {
   container.querySelectorAll("button").forEach((button) => {
     button.classList.toggle("is-selected", button.dataset.value === selectedValue);
@@ -243,6 +280,12 @@ function syncClubPicker() {
 function syncStrikeButtons() {
   strikeRatingGroup.querySelectorAll(".rating-pill").forEach((button) => {
     button.classList.toggle("is-active", Number(button.dataset.value) === selectedStrikeRating);
+  });
+}
+
+function syncSecondShotStrikeButtons() {
+  secondShotStrikeRatingGroup.querySelectorAll(".rating-pill").forEach((button) => {
+    button.classList.toggle("is-active", Number(button.dataset.value) === selectedSecondShotStrikeRating);
   });
 }
 
@@ -320,6 +363,7 @@ function handleSubmit(event) {
     teeOutcome: isPar3 ? "Not tracked" : teeOutcomeInput.value,
     secondShotClub: isPar5 ? secondShotClubInput.value : "N/A",
     secondShotOutcome: isPar5 ? secondShotOutcomeInput.value : "N/A",
+    secondShotStrikeRating: isPar5 ? selectedSecondShotStrikeRating : 0,
     approachDistance: Number(data.get("approachDistance")),
     approachClub: approachClubInput.value,
     approachOutcome: [...selectedApproachOutcomes],
@@ -365,6 +409,7 @@ function resetFormWithHole(holeNumber) {
   shotResultInput.value = "Good";
   puttsInput.value = "2";
   makeUnderSixInput.value = "";
+  selectedSecondShotStrikeRating = 2;
   selectedStrikeRating = 2;
 
   syncOptionButtons(parGroup, parInput.value);
@@ -377,6 +422,7 @@ function resetFormWithHole(holeNumber) {
   syncOptionButtons(puttsGroup, puttsInput.value);
   syncOptionButtons(makeUnderSixGroup, makeUnderSixInput.value);
   syncClubPicker();
+  syncSecondShotStrikeButtons();
   syncStrikeButtons();
   syncParView();
   updateSaveFeedback();
@@ -663,6 +709,7 @@ function renderHistory() {
       { label: "Tee result", value: entry.teeOutcome },
       { label: "2nd shot club", value: entry.secondShotClub || "N/A" },
       { label: "2nd shot result", value: entry.secondShotOutcome || "N/A" },
+      { label: "2nd shot strike", value: entry.secondShotStrikeRating ? getStrikeRatingLabel(entry.secondShotStrikeRating) : "N/A" },
       { label: "Approach", value: `${entry.approachDistance} yds` },
       { label: "Approach club", value: entry.approachClub },
       { label: "Approach result", value: formatApproachOutcome(entry.approachOutcome) },
@@ -705,6 +752,7 @@ async function exportEntriesAsCsv() {
     "Tee Outcome",
     "Second Shot Club",
     "Second Shot Outcome",
+    "Second Shot Strike Rating",
     "Approach Distance",
     "Approach Club",
     "Approach Outcome",
@@ -725,6 +773,7 @@ async function exportEntriesAsCsv() {
     entry.teeOutcome,
     entry.secondShotClub || "N/A",
     entry.secondShotOutcome || "N/A",
+    entry.secondShotStrikeRating ? getStrikeRatingLabel(entry.secondShotStrikeRating) : "N/A",
     entry.approachDistance,
     entry.approachClub,
     formatApproachOutcome(entry.approachOutcome),
@@ -784,6 +833,9 @@ function loadEntries() {
           ...entry,
           par: entry.par ? Number(entry.par) : 4,
           strikeRating: normalizeStrikeRating(entry.strikeRating),
+          secondShotStrikeRating: entry.secondShotStrikeRating
+            ? normalizeStrikeRating(entry.secondShotStrikeRating)
+            : 0,
           putts: entry.putts ? Number(entry.putts) : 0,
           firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
           secondShotClub: entry.secondShotClub || "N/A",

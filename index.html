@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-title" content="Shot Tracker" />
     <link rel="apple-touch-icon" href="./icon-512.png?v=20260326-shot-tracker-name" />
     <link rel="manifest" href="./manifest.webmanifest?v=20260326-shot-tracker-name" />
-    <link rel="stylesheet" href="./styles.css?v=20260403-round-flow-second-shot-v2" />
+    <link rel="stylesheet" href="./styles.css?v=20260409-notes-history-order" />
   </head>
   <body>
     <main class="app-shell">
@@ -26,6 +26,9 @@
       </section>
 
       <nav class="mobile-nav" aria-label="Primary">
+        <button class="mobile-nav-button" data-view-target="notesPanel" type="button">
+          Notes
+        </button>
         <button class="mobile-nav-button is-active" data-view-target="entryPanel" type="button">
           Entry
         </button>
@@ -36,6 +39,26 @@
           History
         </button>
       </nav>
+
+      <section class="dashboard-panel" id="notesPanel" hidden>
+        <div class="panel panel-stats">
+          <div class="panel-heading">
+            <div>
+              <p class="section-kicker">Round Plan</p>
+              <h2>Notes</h2>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>Gameplan for the round</span>
+            <textarea
+              id="roundPlanInput"
+              class="round-plan-textarea"
+              placeholder="Paste or write your round plan here."
+            ></textarea>
+          </label>
+        </div>
+      </section>
 
       <section class="dashboard" id="entryPanel">
         <div class="panel panel-form">
@@ -285,6 +308,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260403-second-shot-order-strike"></script>
+    <script src="./app.js?v=20260409-notes-history-order"></script>
   </body>
 </html>

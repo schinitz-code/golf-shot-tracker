@@ -1,5 +1,6 @@
 const STORAGE_KEY = "golf-shot-tracker-entries";
 const ROUND_NAME_STORAGE_KEY = "golf-shot-tracker-round-name";
+const ROUND_PLAN_STORAGE_KEY = "golf-shot-tracker-round-plan";
 
 const teeClubs = [
   { name: "Driver" },
@@ -118,6 +119,7 @@ const clearAllButton = document.querySelector("#clearAllButton");
 const exportButton = document.querySelector("#exportButton");
 const historyTemplate = document.querySelector("#historyItemTemplate");
 const saveFeedback = document.querySelector("#saveFeedback");
+const roundPlanInput = document.querySelector("#roundPlanInput");
 const mobileNav = document.querySelector(".mobile-nav");
 const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
@@ -150,12 +152,14 @@ function bootstrap() {
   clearAllButton.addEventListener("click", clearAllEntries);
   exportButton.addEventListener("click", exportEntriesAsCsv);
   historyList.addEventListener("click", handleDeleteClick);
+  roundPlanInput.addEventListener("input", handleRoundPlanInput);
   navButtons.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.viewTarget));
   });
   window.addEventListener("resize", handleResize);
 
   roundNameInput.value = loadSavedRoundName();
+  roundPlanInput.value = loadSavedRoundPlan();
   resetForm();
   updateSaveFeedback();
   registerServiceWorker();
@@ -473,6 +477,10 @@ function handleDeleteClick(event) {
   render();
 }
 
+function handleRoundPlanInput() {
+  saveRoundPlan(roundPlanInput.value);
+}
+
 function render() {
   renderHeroSummary();
   renderStats();
@@ -686,7 +694,7 @@ function updateSaveFeedback(savedEntry) {
 }
 
 function renderHistory() {
-  const displayEntries = getDisplayEntries();
+  const displayEntries = getHistoryEntries();
 
   historyList.innerHTML = "";
   emptyState.hidden = entries.length > 0;
@@ -860,11 +868,28 @@ function loadSavedRoundName() {
   }
 }
 
+function loadSavedRoundPlan() {
+  try {
+    return localStorage.getItem(ROUND_PLAN_STORAGE_KEY) || "";
+  } catch (error) {
+    console.error("Unable to load saved round plan", error);
+    return "";
+  }
+}
+
 function saveRoundName(value) {
   try {
     localStorage.setItem(ROUND_NAME_STORAGE_KEY, value);
   } catch (error) {
     console.error("Unable to save round name", error);
+  }
+}
+
+function saveRoundPlan(value) {
+  try {
+    localStorage.setItem(ROUND_PLAN_STORAGE_KEY, value);
+  } catch (error) {
+    console.error("Unable to save round plan", error);
   }
 }
 
@@ -882,6 +907,10 @@ function normalizeText(value) {
 
 function getDisplayEntries() {
   return [...entries].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+}
+
+function getHistoryEntries() {
+  return [...entries].sort((a, b) => a.hole - b.hole || new Date(a.createdAt) - new Date(b.createdAt));
 }
 
 function getLatestEntry() {

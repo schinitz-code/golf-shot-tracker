@@ -74,11 +74,19 @@ const approachOutcomes = [
 ];
 const additionalShotOptions = ["No", "Yes"];
 const chipWedgeClubs = [
+  { name: "Putter" },
   { name: "60 Degree Wedge" },
   { name: "56 Degree Wedge" },
   { name: "52 Degree Wedge" },
   { name: "48 Degree Wedge" },
-  { name: "Pitching Wedge" }
+  { name: "Pitching Wedge" },
+  { name: "9 Iron" },
+  { name: "8 Iron" },
+  { name: "7 Iron" },
+  { name: "6 Iron" },
+  { name: "5 Iron" },
+  { name: "7 Wood" },
+  { name: "4 Wood" }
 ];
 const strikeRatings = [
   { value: 1, label: "Flush" },

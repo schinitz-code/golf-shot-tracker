@@ -72,6 +72,14 @@ const approachOutcomes = [
   "Greenside bunker",
   "Penalty area"
 ];
+const additionalShotOptions = ["No", "Yes"];
+const chipWedgeClubs = [
+  { name: "60 Degree Wedge" },
+  { name: "56 Degree Wedge" },
+  { name: "52 Degree Wedge" },
+  { name: "48 Degree Wedge" },
+  { name: "Pitching Wedge" }
+];
 const strikeRatings = [
   { value: 1, label: "Flush" },
   { value: 2, label: "OK" },
@@ -101,6 +109,17 @@ const approachClubInput = document.querySelector("#approachClubInput");
 const approachClubGroup = document.querySelector("#approachClubGroup");
 const approachOutcomeInput = document.querySelector("#approachOutcomeInput");
 const approachOutcomeGroup = document.querySelector("#approachOutcomeGroup");
+const addAnotherShotInput = document.querySelector("#addAnotherShotInput");
+const addAnotherShotGroup = document.querySelector("#addAnotherShotGroup");
+const extraApproachSection = document.querySelector("#extraApproachSection");
+const extraApproachClubInput = document.querySelector("#extraApproachClubInput");
+const extraApproachClubGroup = document.querySelector("#extraApproachClubGroup");
+const extraApproachOutcomeInput = document.querySelector("#extraApproachOutcomeInput");
+const extraApproachOutcomeGroup = document.querySelector("#extraApproachOutcomeGroup");
+const extraApproachStrikeRatingGroup = document.querySelector("#extraApproachStrikeRatingGroup");
+const chipSection = document.querySelector("#chipSection");
+const chipClubInput = document.querySelector("#chipClubInput");
+const chipClubGroup = document.querySelector("#chipClubGroup");
 const shotResultInput = document.querySelector("#shotResultInput");
 const shotResultGroup = document.querySelector("#shotResultGroup");
 const strikeRatingGroup = document.querySelector("#strikeRatingGroup");
@@ -127,6 +146,8 @@ const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
 let selectedStrikeRating = 2;
 let selectedSecondShotStrikeRating = 2;
 let selectedApproachOutcomes = [];
+let selectedExtraApproachStrikeRating = 2;
+let selectedExtraApproachOutcomes = [];
 let entries = loadEntries();
 let currentView = "entryPanel";
 
@@ -139,12 +160,27 @@ function bootstrap() {
   renderOptionGroup(secondShotClubGroup, secondShotClubInput, secondShotClubs.map((club) => club.name));
   renderOptionGroup(secondShotOutcomeGroup, secondShotOutcomeInput, teeOutcomes);
   renderOptionGroup(approachClubGroup, approachClubInput, approachClubs.map((club) => club.name));
-  renderMultiSelectGroup(approachOutcomeGroup, approachOutcomes, selectedApproachOutcomes);
+  renderMultiSelectGroup(
+    approachOutcomeGroup,
+    approachOutcomes,
+    selectedApproachOutcomes,
+    toggleApproachOutcome
+  );
+  renderOptionGroup(addAnotherShotGroup, addAnotherShotInput, additionalShotOptions, "option-button", syncApproachFollowUpView);
+  renderOptionGroup(extraApproachClubGroup, extraApproachClubInput, approachClubs.map((club) => club.name));
+  renderMultiSelectGroup(
+    extraApproachOutcomeGroup,
+    approachOutcomes,
+    selectedExtraApproachOutcomes,
+    toggleExtraApproachOutcome
+  );
+  renderOptionGroup(chipClubGroup, chipClubInput, chipWedgeClubs.map((club) => club.name));
   renderOptionGroup(shotResultGroup, shotResultInput, shotResultOptions);
   renderOptionGroup(puttsGroup, puttsInput, puttOptions, "option-button");
   renderOptionGroup(makeUnderSixGroup, makeUnderSixInput, makeUnderSixOptions, "option-button");
   renderStrikeOptions();
   renderSecondShotStrikeOptions();
+  renderExtraApproachStrikeOptions();
 
   form.addEventListener("submit", handleSubmit);
   resetFormButton.addEventListener("click", resetForm);
@@ -206,7 +242,7 @@ function renderOptionGroup(container, input, options, buttonClass = "option-butt
   });
 }
 
-function renderMultiSelectGroup(container, options, selectedValues) {
+function renderMultiSelectGroup(container, options, selectedValues, onToggle = toggleApproachOutcome) {
   container.innerHTML = "";
 
   options.forEach((option) => {
@@ -216,7 +252,7 @@ function renderMultiSelectGroup(container, options, selectedValues) {
     button.dataset.value = option;
     button.textContent = option;
     button.addEventListener("click", () => {
-      toggleApproachOutcome(option);
+      onToggle(option);
     });
     container.appendChild(button);
   });
@@ -262,6 +298,25 @@ function renderSecondShotStrikeOptions() {
   syncSecondShotStrikeButtons();
 }
 
+function renderExtraApproachStrikeOptions() {
+  extraApproachStrikeRatingGroup.innerHTML = "";
+
+  strikeRatings.forEach((rating) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "rating-pill";
+    button.textContent = rating.label;
+    button.dataset.value = String(rating.value);
+    button.addEventListener("click", () => {
+      selectedExtraApproachStrikeRating = rating.value;
+      syncExtraApproachStrikeButtons();
+    });
+    extraApproachStrikeRatingGroup.appendChild(button);
+  });
+
+  syncExtraApproachStrikeButtons();
+}
+
 function syncOptionButtons(container, selectedValue) {
   container.querySelectorAll("button").forEach((button) => {
     button.classList.toggle("is-selected", button.dataset.value === selectedValue);
@@ -293,6 +348,12 @@ function syncSecondShotStrikeButtons() {
   });
 }
 
+function syncExtraApproachStrikeButtons() {
+  extraApproachStrikeRatingGroup.querySelectorAll(".rating-pill").forEach((button) => {
+    button.classList.toggle("is-active", Number(button.dataset.value) === selectedExtraApproachStrikeRating);
+  });
+}
+
 function toggleApproachOutcome(value) {
   if (selectedApproachOutcomes.includes(value)) {
     selectedApproachOutcomes = selectedApproachOutcomes.filter((item) => item !== value);
@@ -302,6 +363,50 @@ function toggleApproachOutcome(value) {
 
   approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
   syncMultiSelectButtons(approachOutcomeGroup, selectedApproachOutcomes);
+  syncApproachFollowUpView();
+}
+
+function toggleExtraApproachOutcome(value) {
+  if (selectedExtraApproachOutcomes.includes(value)) {
+    selectedExtraApproachOutcomes = selectedExtraApproachOutcomes.filter((item) => item !== value);
+  } else {
+    selectedExtraApproachOutcomes = [...selectedExtraApproachOutcomes, value];
+  }
+
+  extraApproachOutcomeInput.value = selectedExtraApproachOutcomes.join(" | ");
+  syncMultiSelectButtons(extraApproachOutcomeGroup, selectedExtraApproachOutcomes);
+  syncApproachFollowUpView();
+}
+
+function getFinalApproachOutcomeList() {
+  return addAnotherShotInput.value === "Yes"
+    ? selectedExtraApproachOutcomes
+    : selectedApproachOutcomes;
+}
+
+function shouldShowChipSection() {
+  const finalOutcomes = getFinalApproachOutcomeList();
+
+  if (!finalOutcomes.length) {
+    return false;
+  }
+
+  return finalOutcomes.some(
+    (outcome) => !["GIR", "Pin high", "Left", "Right"].includes(outcome)
+  );
+}
+
+function syncApproachFollowUpView() {
+  const showExtraApproach = addAnotherShotInput.value === "Yes";
+  extraApproachSection.classList.toggle("is-hidden", !showExtraApproach);
+
+  const showChip = shouldShowChipSection();
+  chipSection.classList.toggle("is-hidden", !showChip);
+
+  if (!showChip) {
+    chipClubInput.value = "";
+    syncOptionButtons(chipClubGroup, chipClubInput.value);
+  }
 }
 
 function handleSubmit(event) {
@@ -321,6 +426,9 @@ function handleSubmit(event) {
   }
   if (!selectedApproachOutcomes.length) {
     missingSelections.push("approach result");
+  }
+  if (!addAnotherShotInput.value) {
+    missingSelections.push("add another shot");
   }
   if (!puttsInput.value) {
     missingSelections.push("number of putts");
@@ -342,6 +450,21 @@ function handleSubmit(event) {
   }
   if (isPar5 && !secondShotOutcomeInput.value) {
     missingSelections.push("second shot result");
+  }
+  if (
+    addAnotherShotInput.value === "Yes" &&
+    !form.elements.namedItem("extraApproachDistance")?.value
+  ) {
+    missingSelections.push("additional shot distance");
+  }
+  if (addAnotherShotInput.value === "Yes" && !extraApproachClubInput.value) {
+    missingSelections.push("additional shot club");
+  }
+  if (addAnotherShotInput.value === "Yes" && !selectedExtraApproachOutcomes.length) {
+    missingSelections.push("additional shot result");
+  }
+  if (shouldShowChipSection() && !chipClubInput.value) {
+    missingSelections.push("chip wedge");
   }
 
   if (missingSelections.length) {
@@ -368,9 +491,18 @@ function handleSubmit(event) {
     secondShotClub: isPar5 ? secondShotClubInput.value : "N/A",
     secondShotOutcome: isPar5 ? secondShotOutcomeInput.value : "N/A",
     secondShotStrikeRating: isPar5 ? selectedSecondShotStrikeRating : 0,
+    addAnotherShot: addAnotherShotInput.value,
     approachDistance: Number(data.get("approachDistance")),
     approachClub: approachClubInput.value,
     approachOutcome: [...selectedApproachOutcomes],
+    extraApproachDistance:
+      addAnotherShotInput.value === "Yes" ? Number(data.get("extraApproachDistance")) : 0,
+    extraApproachClub: addAnotherShotInput.value === "Yes" ? extraApproachClubInput.value : "N/A",
+    extraApproachOutcome:
+      addAnotherShotInput.value === "Yes" ? [...selectedExtraApproachOutcomes] : [],
+    extraApproachStrikeRating:
+      addAnotherShotInput.value === "Yes" ? selectedExtraApproachStrikeRating : 0,
+    chipClub: shouldShowChipSection() ? chipClubInput.value : "N/A",
     shotResult: isPar3 ? "N/A (Par 3)" : shotResultInput.value,
     strikeRating: selectedStrikeRating,
     firstPuttDistance: Number(data.get("firstPuttDistance")),
@@ -410,10 +542,16 @@ function resetFormWithHole(holeNumber) {
   approachClubInput.value = "";
   selectedApproachOutcomes = [];
   approachOutcomeInput.value = selectedApproachOutcomes.join(" | ");
+  addAnotherShotInput.value = "No";
+  extraApproachClubInput.value = "";
+  extraApproachOutcomeInput.value = "";
+  selectedExtraApproachOutcomes = [];
+  chipClubInput.value = "";
   shotResultInput.value = "Good";
   puttsInput.value = "2";
   makeUnderSixInput.value = "";
   selectedSecondShotStrikeRating = 2;
+  selectedExtraApproachStrikeRating = 2;
   selectedStrikeRating = 2;
 
   syncOptionButtons(parGroup, parInput.value);
@@ -422,13 +560,19 @@ function resetFormWithHole(holeNumber) {
   syncOptionButtons(secondShotOutcomeGroup, secondShotOutcomeInput.value);
   syncOptionButtons(approachClubGroup, approachClubInput.value);
   syncMultiSelectButtons(approachOutcomeGroup, selectedApproachOutcomes);
+  syncOptionButtons(addAnotherShotGroup, addAnotherShotInput.value);
+  syncOptionButtons(extraApproachClubGroup, extraApproachClubInput.value);
+  syncMultiSelectButtons(extraApproachOutcomeGroup, selectedExtraApproachOutcomes);
+  syncOptionButtons(chipClubGroup, chipClubInput.value);
   syncOptionButtons(shotResultGroup, shotResultInput.value);
   syncOptionButtons(puttsGroup, puttsInput.value);
   syncOptionButtons(makeUnderSixGroup, makeUnderSixInput.value);
   syncClubPicker();
   syncSecondShotStrikeButtons();
+  syncExtraApproachStrikeButtons();
   syncStrikeButtons();
   syncParView();
+  syncApproachFollowUpView();
   updateSaveFeedback();
 }
 
@@ -721,6 +865,12 @@ function renderHistory() {
       { label: "Approach", value: `${entry.approachDistance} yds` },
       { label: "Approach club", value: entry.approachClub },
       { label: "Approach result", value: formatApproachOutcome(entry.approachOutcome) },
+      { label: "Add another shot", value: entry.addAnotherShot || "No" },
+      { label: "Additional shot", value: entry.extraApproachDistance ? `${entry.extraApproachDistance} yds` : "N/A" },
+      { label: "Additional club", value: entry.extraApproachClub || "N/A" },
+      { label: "Additional result", value: formatApproachOutcome(entry.extraApproachOutcome) || "N/A" },
+      { label: "Additional strike", value: entry.extraApproachStrikeRating ? getStrikeRatingLabel(entry.extraApproachStrikeRating) : "N/A" },
+      { label: "Chip wedge", value: entry.chipClub || "N/A" },
       { label: "Result", value: entry.shotResult },
       { label: "Strike", value: getStrikeRatingLabel(entry.strikeRating) },
       { label: "1st putt", value: `${entry.firstPuttDistance} ft` },
@@ -764,6 +914,12 @@ async function exportEntriesAsCsv() {
     "Approach Distance",
     "Approach Club",
     "Approach Outcome",
+    "Add Another Shot",
+    "Additional Shot Distance",
+    "Additional Shot Club",
+    "Additional Shot Outcome",
+    "Additional Shot Strike Rating",
+    "Chip Wedge",
     "Result",
     "Strike Rating",
     "First Putt Distance",
@@ -785,6 +941,12 @@ async function exportEntriesAsCsv() {
     entry.approachDistance,
     entry.approachClub,
     formatApproachOutcome(entry.approachOutcome),
+    entry.addAnotherShot || "No",
+    entry.extraApproachDistance || "N/A",
+    entry.extraApproachClub || "N/A",
+    formatApproachOutcome(entry.extraApproachOutcome) || "N/A",
+    entry.extraApproachStrikeRating ? getStrikeRatingLabel(entry.extraApproachStrikeRating) : "N/A",
+    entry.chipClub || "N/A",
     entry.shotResult,
     getStrikeRatingLabel(entry.strikeRating),
     entry.firstPuttDistance,
@@ -844,11 +1006,21 @@ function loadEntries() {
           secondShotStrikeRating: entry.secondShotStrikeRating
             ? normalizeStrikeRating(entry.secondShotStrikeRating)
             : 0,
+          addAnotherShot: entry.addAnotherShot || "No",
           putts: entry.putts ? Number(entry.putts) : 0,
           firstPuttDistance: entry.firstPuttDistance ? Number(entry.firstPuttDistance) : 0,
           secondShotClub: entry.secondShotClub || "N/A",
           secondShotOutcome: entry.secondShotOutcome || "N/A",
           approachOutcome: getApproachOutcomeList(entry.approachOutcome),
+          extraApproachDistance: entry.extraApproachDistance
+            ? Number(entry.extraApproachDistance)
+            : 0,
+          extraApproachClub: entry.extraApproachClub || "N/A",
+          extraApproachOutcome: getApproachOutcomeList(entry.extraApproachOutcome),
+          extraApproachStrikeRating: entry.extraApproachStrikeRating
+            ? normalizeStrikeRating(entry.extraApproachStrikeRating)
+            : 0,
+          chipClub: entry.chipClub || "N/A",
           shotResult: entry.shotResult || "",
           makeUnderSix: entry.makeUnderSix || ""
         }))

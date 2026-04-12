@@ -173,6 +173,59 @@
                 <legend>Strike rating</legend>
                 <div id="strikeRatingGroup" class="rating-row"></div>
               </fieldset>
+
+              <div class="field">
+                <span>Add another shot?</span>
+                <input type="hidden" name="addAnotherShot" id="addAnotherShotInput" />
+                <div id="addAnotherShotGroup" class="option-grid option-grid-two"></div>
+              </div>
+            </div>
+
+            <div class="entry-section is-hidden" id="extraApproachSection">
+              <div class="entry-header">
+                <p class="section-kicker">Additional Shot</p>
+                <h3>One more shot in</h3>
+              </div>
+              <div class="field-grid">
+                <label class="field">
+                  <span>Shot distance (yards)</span>
+                  <input
+                    type="number"
+                    name="extraApproachDistance"
+                    min="1"
+                    max="250"
+                  />
+                </label>
+
+                <div class="field field-span-full">
+                  <span>Shot club</span>
+                  <input type="hidden" name="extraApproachClub" id="extraApproachClubInput" />
+                  <div id="extraApproachClubGroup" class="option-grid option-grid-clubs"></div>
+                </div>
+
+                <div class="field field-span-full">
+                  <span>Shot result</span>
+                  <input type="hidden" name="extraApproachOutcome" id="extraApproachOutcomeInput" />
+                  <div id="extraApproachOutcomeGroup" class="option-grid option-grid-two"></div>
+                </div>
+              </div>
+
+              <fieldset class="rating-fieldset">
+                <legend>Strike rating</legend>
+                <div id="extraApproachStrikeRatingGroup" class="rating-row"></div>
+              </fieldset>
+            </div>
+
+            <div class="entry-section is-hidden" id="chipSection">
+              <div class="entry-header">
+                <p class="section-kicker">Chip Shot</p>
+                <h3>Which wedge did you use?</h3>
+              </div>
+              <div class="field field-span-full">
+                <span>Chip wedge</span>
+                <input type="hidden" name="chipClub" id="chipClubInput" />
+                <div id="chipClubGroup" class="option-grid option-grid-clubs"></div>
+              </div>
             </div>
 
             <div class="entry-section">
@@ -308,6 +361,6 @@
       </article>
     </template>
 
-    <script src="./app.js?v=20260409-notes-history-order"></script>
+    <script src="./app.js?v=20260412-additional-shot-chip-flow"></script>
   </body>
 </html>

@@ -1,6 +1,7 @@
 const STORAGE_KEY = "golf-shot-tracker-entries";
 const ROUND_NAME_STORAGE_KEY = "golf-shot-tracker-round-name";
 const ROUND_PLAN_STORAGE_KEY = "golf-shot-tracker-round-plan";
+const GENERAL_NOTES_STORAGE_KEY = "golf-shot-tracker-general-notes";
 
 const teeClubs = [
   { name: "Driver" },
@@ -147,6 +148,7 @@ const exportButton = document.querySelector("#exportButton");
 const historyTemplate = document.querySelector("#historyItemTemplate");
 const saveFeedback = document.querySelector("#saveFeedback");
 const roundPlanInput = document.querySelector("#roundPlanInput");
+const generalNotesInput = document.querySelector("#generalNotesInput");
 const mobileNav = document.querySelector(".mobile-nav");
 const navButtons = document.querySelectorAll(".mobile-nav-button");
 const panels = document.querySelectorAll(".dashboard, .dashboard-panel");
@@ -197,6 +199,7 @@ function bootstrap() {
   exportButton.addEventListener("click", exportEntriesAsCsv);
   historyList.addEventListener("click", handleDeleteClick);
   roundPlanInput.addEventListener("input", handleRoundPlanInput);
+  generalNotesInput.addEventListener("input", handleGeneralNotesInput);
   navButtons.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.viewTarget));
   });
@@ -204,6 +207,7 @@ function bootstrap() {
 
   roundNameInput.value = loadSavedRoundName();
   roundPlanInput.value = loadSavedRoundPlan();
+  generalNotesInput.value = loadSavedGeneralNotes();
   resetForm();
   updateSaveFeedback();
   registerServiceWorker();
@@ -633,6 +637,10 @@ function handleRoundPlanInput() {
   saveRoundPlan(roundPlanInput.value);
 }
 
+function handleGeneralNotesInput() {
+  saveGeneralNotes(generalNotesInput.value);
+}
+
 function render() {
   renderHeroSummary();
   renderStats();
@@ -1057,6 +1065,15 @@ function loadSavedRoundPlan() {
   }
 }
 
+function loadSavedGeneralNotes() {
+  try {
+    return localStorage.getItem(GENERAL_NOTES_STORAGE_KEY) || "";
+  } catch (error) {
+    console.error("Unable to load saved general notes", error);
+    return "";
+  }
+}
+
 function saveRoundName(value) {
   try {
     localStorage.setItem(ROUND_NAME_STORAGE_KEY, value);
@@ -1070,6 +1087,14 @@ function saveRoundPlan(value) {
     localStorage.setItem(ROUND_PLAN_STORAGE_KEY, value);
   } catch (error) {
     console.error("Unable to save round plan", error);
+  }
+}
+
+function saveGeneralNotes(value) {
+  try {
+    localStorage.setItem(GENERAL_NOTES_STORAGE_KEY, value);
+  } catch (error) {
+    console.error("Unable to save general notes", error);
   }
 }
 

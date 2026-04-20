@@ -459,6 +459,10 @@ textarea {
   min-height: 320px;
 }
 
+.general-notes-textarea {
+  min-height: 220px;
+}
+
 input:focus,
 select:focus,
 textarea:focus {

@@ -73,6 +73,18 @@ const approachOutcomes = [
   "Greenside bunker",
   "Penalty area"
 ];
+const extraApproachOutcomes = [
+  "Green",
+  "Pin high",
+  "Left",
+  "Right",
+  "Fringe",
+  "Rough",
+  "Long",
+  "Short",
+  "Greenside bunker",
+  "Penalty area"
+];
 const additionalShotOptions = ["No", "Yes"];
 const chipWedgeClubs = [
   { name: "Putter" },
@@ -180,7 +192,7 @@ function bootstrap() {
   renderOptionGroup(extraApproachClubGroup, extraApproachClubInput, approachClubs.map((club) => club.name));
   renderMultiSelectGroup(
     extraApproachOutcomeGroup,
-    approachOutcomes,
+    extraApproachOutcomes,
     selectedExtraApproachOutcomes,
     toggleExtraApproachOutcome
   );
@@ -404,7 +416,7 @@ function shouldShowChipSection() {
   }
 
   return finalOutcomes.some(
-    (outcome) => !["GIR", "Pin high", "Left", "Right"].includes(outcome)
+    (outcome) => !["GIR", "Green", "Pin high", "Left", "Right"].includes(outcome)
   );
 }
 
@@ -674,7 +686,7 @@ function renderStats() {
   const latestEntry = getLatestEntry();
   const teeOpportunities = entries.filter((entry) => entry.par !== 3);
   const teeFairways = teeOpportunities.filter((entry) => entry.teeOutcome === "Fairway").length;
-  const girs = entries.filter((entry) => getApproachOutcomeList(entry.approachOutcome).includes("GIR")).length;
+  const girs = entries.filter(countsAsGir).length;
   const averageApproachDistance = entries.length
     ? Math.round(entries.reduce((sum, entry) => sum + entry.approachDistance, 0) / entries.length)
     : 0;
@@ -746,7 +758,7 @@ function renderClubReport() {
     current.shots += 1;
     current.totalDistance += entry.approachDistance;
     current.totalStrike += entry.strikeRating;
-    if (getApproachOutcomeList(entry.approachOutcome).includes("GIR")) {
+    if (countsAsGir(entry)) {
       current.girs += 1;
     }
 
@@ -1179,6 +1191,10 @@ function getApproachOutcomeList(value) {
 
 function formatApproachOutcome(value) {
   return getApproachOutcomeList(value).join(", ");
+}
+
+function countsAsGir(entry) {
+  return getApproachOutcomeList(entry?.approachOutcome).includes("GIR");
 }
 
 function normalizeStrikeRating(value) {
